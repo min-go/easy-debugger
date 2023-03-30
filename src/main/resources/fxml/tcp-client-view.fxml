@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Text?>
+<Tab closable="false" text="TCP客户端" xmlns:fx="http://javafx.com/fxml/1">
+    <content>
+        <HBox>
+            <BorderPane>
+                <center>
+                    <ListView fx:id="connectConfigListView" prefWidth="200">
+                        <placeholder>
+                            <StackPane>
+                                <Label text="暂无配置..." style="-fx-font-size: 12px; -fx-text-fill: gray;"></Label>
+                            </StackPane>
+                        </placeholder>
+                    </ListView>
+                </center>
+                <bottom>
+                    <HBox spacing="10" alignment="CENTER_LEFT">
+                        <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+                        <children>
+                            <Button fx:id="addBtn" text="添加"></Button>
+                            <Button fx:id="deleteBtn" text="移除"></Button>
+                        </children>
+                    </HBox>
+                </bottom>
+            </BorderPane>
+
+            <BorderPane>
+                <top>
+                    <VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+                            <Label text="主机："></Label>
+                            <TextField fx:id="hostField" promptText="地址" disable="true"></TextField>
+                            <TextField fx:id="portField" promptText="端口" disable="true"></TextField>
+                            <Button fx:id="editBtn" text="编辑"></Button>
+                            <Button fx:id="connectBtn" text="连接"></Button>
+                        </HBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+                            <Label text="连接状态："></Label>
+                            <Text fx:id="statusText" text="未连接" fill="red"></Text>
+                            <Button fx:id="clearBtn" text="清空消息"></Button>
+                        </HBox>
+                    </VBox>
+                </top>
+                <center>
+                    <ScrollPane fx:id="msgContentPane" fitToWidth="true">
+                        <ListView fx:id="msgContentList">
+                            <placeholder>
+                                <StackPane>
+                                    <Label text="暂无数据..." style="-fx-font-size: 12px; -fx-text-fill: gray;"></Label>
+                                </StackPane>
+                            </placeholder>
+                        </ListView>
+                    </ScrollPane>
+                </center>
+                <bottom>
+                    <HBox alignment="CENTER_LEFT" spacing="10">
+                        <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+                        <TextField fx:id="sendMsgField" promptText="请输入要发送的文本" prefWidth="400"></TextField>
+                        <RadioButton fx:id="stringMsgOption" text="文本" selected="true" />
+                        <RadioButton fx:id="hexMsgOption" text="16进制"  />
+                        <Button fx:id="sendMsgBtn" text="发送"></Button>
+                    </HBox>
+                </bottom>
+            </BorderPane>
+        </HBox>
+    </content>
+</Tab>

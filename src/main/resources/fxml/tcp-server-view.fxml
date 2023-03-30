@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.text.Text?>
+<Tab closable="false" text="TCP服务端">
+    <content>
+        <StackPane alignment="CENTER">
+            <Text text="开发中...^_^ 敬请期待～"></Text>
+        </StackPane>
+    </content>
+</Tab>

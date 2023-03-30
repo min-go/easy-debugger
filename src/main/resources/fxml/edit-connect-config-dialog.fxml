@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.ConnectConfigDialogController">
+    <content>
+        <GridPane hgap="10" vgap="10">
+            <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+            <Label text="名称：" GridPane.columnIndex="0" GridPane.rowIndex="0"></Label>
+            <TextField fx:id="nameField" GridPane.columnIndex="1" GridPane.rowIndex="0"></TextField>
+            <Label text="主机地址：" GridPane.columnIndex="0" GridPane.rowIndex="1"></Label>
+            <TextField fx:id="hostField" GridPane.columnIndex="1" GridPane.rowIndex="1"></TextField>
+            <Label text="端口：" GridPane.columnIndex="0" GridPane.rowIndex="2"></Label>
+            <TextField fx:id="portField" GridPane.columnIndex="1" GridPane.rowIndex="2"></TextField>
+        </GridPane>
+    </content>
+    <buttonTypes>
+        <ButtonType fx:id="submitBtnType" text="保存" buttonData="APPLY"></ButtonType>
+        <ButtonType fx:id="cancelBtnType" text="取消" buttonData="CANCEL_CLOSE"></ButtonType>
+    </buttonTypes>
+</DialogPane>

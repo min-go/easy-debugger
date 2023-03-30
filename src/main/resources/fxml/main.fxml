@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TabPane?>
+<TabPane fx:id="tabPane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.MainController">
+    <tabs>
+        <!--<Tab closable="false" text="TCP客户端">
+            <content>
+                <fx:include fx:id="tcpClientTabPage" source="tcp-client-view.fxml"/>
+            </content>
+        </Tab>
+        <Tab closable="false" text="TCP服务端">
+            <content>
+                <fx:include fx:id="tcpServerTabPage" source="tcp-server-view.fxml"/>
+            </content>
+        </Tab>-->
+    </tabs>
+</TabPane>
