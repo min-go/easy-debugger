@@ -3,13 +3,14 @@ package io.dengliming.easydebugger.utils;
 import io.dengliming.easydebugger.model.ChatMsgBox;
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.AbstractSocketClient;
-import io.dengliming.easydebugger.netty.ClientConnectProperties;
 import io.dengliming.easydebugger.netty.IClientEventListener;
 import io.dengliming.easydebugger.netty.TcpDebuggerClient;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public enum TcpDebugCache {
     INSTANCE;
 
@@ -26,7 +27,7 @@ public enum TcpDebugCache {
             if (client != null) {
                 return client;
             }
-            client = new TcpDebuggerClient(new ClientConnectProperties(config.getHost(), config.getPort(), config.getUid()), clientEventListener);
+            client = new TcpDebuggerClient(config, clientEventListener);
             CLIENT_CACHE.put(config.getUid(), client);
             client.init();
         }
@@ -47,6 +48,13 @@ public enum TcpDebugCache {
             MSG_BOX_CACHE.put(clientId, chatMsgBox);
         }
         return chatMsgBox;
+    }
+
+    public void disconnectClient(String clientId) {
+        AbstractSocketClient client = CLIENT_CACHE.get(clientId);
+        if (client != null) {
+            client.disconnect();
+        }
     }
 
     public void removeCache(String clientId) {

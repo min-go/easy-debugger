@@ -2,6 +2,7 @@ package io.dengliming.easydebugger.model;
 
 import io.dengliming.easydebugger.utils.DateUtils;
 import io.dengliming.easydebugger.utils.SceneUtils;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
@@ -33,17 +34,17 @@ public class ChatMsgBox {
     }
 
     public ChatMsgBox addLeftMsg(String message) {
-        contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), true));
+        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), true)));
         return this;
     }
 
     public ChatMsgBox addRightMsg(String message) {
-        contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), false));
+        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), false)));
         return this;
     }
 
     public ChatMsgBox clear() {
-        contentListView.getItems().clear();
+        Platform.runLater(() -> contentListView.getItems().clear());
         return this;
     }
 

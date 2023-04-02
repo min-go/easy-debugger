@@ -10,17 +10,17 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 public enum ConfigStorage {
     INSTANCE;
 
-    private final List<ConnectConfig> connectConfigs = new ArrayList<>();
-    private final String connectConfigFilePath = System.getProperty("user.home") + "/Documents/EasyDebugger/";
-    private final String connectConfigFile = "connect-config.xml";
+    private static final String CONNECT_CONFIG_FILE_PATH = System.getProperty("user.home") + "/Documents/EasyDebugger/";
+    private static final String CONNECT_CONFIG_FILE = "connect-config.xml";
+    private static final String EMPTY_CONFIG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<connectConfigs></connectConfigs>";
+    private final Map<String, ConnectConfig> connectConfigMap = new LinkedHashMap<>();
 
     public void loadConnectConfigDataFromFile(File file) {
         try {
@@ -28,9 +28,9 @@ public enum ConfigStorage {
                     .newInstance(ConnectConfigWrapper.class);
             Unmarshaller um = context.createUnmarshaller();
             ConnectConfigWrapper wrapper = (ConnectConfigWrapper) um.unmarshal(file);
-            connectConfigs.clear();
+            connectConfigMap.clear();
             if (wrapper.getConnectConfigs() != null) {
-                connectConfigs.addAll(wrapper.getConnectConfigs());
+                wrapper.getConnectConfigs().forEach(it -> connectConfigMap.put(it.getUid(), it));
             }
         } catch (Exception e) {
             log.error("loadConnectConfigDataFromFile error.", e);
@@ -45,7 +45,7 @@ public enum ConfigStorage {
             m.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
             m.setProperty(Marshaller.JAXB_ENCODING, StandardCharsets.UTF_8.name());
             ConnectConfigWrapper wrapper = new ConnectConfigWrapper();
-            wrapper.setConnectConfigs(connectConfigs);
+            wrapper.setConnectConfigs(getConnectConfigs());
             m.marshal(wrapper, file);
         } catch (Throwable e) {
             log.error("saveConnectConfigDataToFile error.", e);
@@ -54,14 +54,14 @@ public enum ConfigStorage {
 
     public File getConnectConfigFile() {
         try {
-            File dir = new File(connectConfigFilePath);
+            File dir = new File(CONNECT_CONFIG_FILE_PATH);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
-            File file = new File(connectConfigFilePath + connectConfigFile);
+            File file = new File(CONNECT_CONFIG_FILE_PATH + CONNECT_CONFIG_FILE);
             if (!file.exists()) {
                 file.createNewFile(); // 如果文件不存在，则自动创建
-                FileUtils.writeStringToFile(file, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<connectConfigs></connectConfigs>", StandardCharsets.UTF_8);
+                FileUtils.writeStringToFile(file, EMPTY_CONFIG_XML, StandardCharsets.UTF_8);
             }
             return file;
         } catch (Exception e) {
@@ -75,16 +75,21 @@ public enum ConfigStorage {
     }
 
     public void add(ConnectConfig config) {
-        connectConfigs.add(config);
+        connectConfigMap.put(config.getUid(), config);
+        flushDb();
+    }
+
+    public void set(ConnectConfig config) {
+        connectConfigMap.replace(config.getUid(), config);
         flushDb();
     }
 
     public void removeAll(Collection<ConnectConfig> config) {
-        connectConfigs.removeAll(config);
+        config.forEach(c -> connectConfigMap.remove(c.getUid()));
         flushDb();
     }
 
     public List<ConnectConfig> getConnectConfigs() {
-        return connectConfigs;
+        return connectConfigMap.values().stream().collect(Collectors.toList());
     }
 }

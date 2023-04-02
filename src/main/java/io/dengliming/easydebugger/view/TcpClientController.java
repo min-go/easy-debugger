@@ -10,10 +10,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -50,8 +53,6 @@ public class TcpClientController implements IClientEventListener, Initializable 
     @FXML
     private RadioButton hexMsgOption;
     @FXML
-    private ListView msgContentList;
-    @FXML
     private ScrollPane msgContentPane;
     @FXML
     private Text statusText;
@@ -84,7 +85,7 @@ public class TcpClientController implements IClientEventListener, Initializable 
     }
 
     private void initClearBtn() {
-        clearBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> msgContentList.getItems().clear());
+        clearBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> ((ListView) (msgContentPane.getContent())).getItems().clear());
     }
 
     private void initSendMsgBtn() {
@@ -100,18 +101,9 @@ public class TcpClientController implements IClientEventListener, Initializable 
                 return;
             }
 
-            String key = selectedItem.getUid();
             try {
-                AbstractSocketClient client = TcpDebugCache.INSTANCE.getOrCreateClient(selectedItem, this);
-                client.connect(null, 3000);
-                IMessage msg = null;
-                if (hexMsgOption.isSelected()) {
-                    msg = new HexStringMessage(message);
-                } else {
-                    msg = new StringMessage(message);
-                }
-                client.writeAndFlush(msg);
-                TcpDebugCache.INSTANCE.getOrCreateChatMsgBox(key).addRightMsg(message);
+                TcpDebuggerClient client = (TcpDebuggerClient) TcpDebugCache.INSTANCE.getOrCreateClient(selectedItem, this);
+                client.sendMsg(hexMsgOption.isSelected() ? MsgType.HEX : MsgType.STRING, message);
             } catch (Exception e) {
                 log.error("connect error.", e);
             }
@@ -172,6 +164,12 @@ public class TcpClientController implements IClientEventListener, Initializable 
 
                 hostField.setText(selectedItem.getHost());
                 portField.setText(String.valueOf(selectedItem.getPort()));
+
+                // 重新编辑之后重置连接
+                TcpDebugCache.INSTANCE.disconnectClient(selectedItem.getUid());
+                setClientStatus(false);
+
+                ConfigStorage.INSTANCE.set(selectedItem);
             }
         });
     }
@@ -182,14 +180,16 @@ public class TcpClientController implements IClientEventListener, Initializable 
             loader.setLocation(getClass().getResource("/fxml/edit-connect-config-dialog.fxml"));
             DialogPane page = loader.load();
 
-            Dialog dialog = new Dialog();
-            dialog.setDialogPane(page);
-            dialog.setTitle("添加配置");
-            ConnectConfigDialogController connectConfigDialogController = loader.getController();
-            connectConfigDialogController.setDialog(dialog);
-            connectConfigDialogController.setConfig(connectConfig);
-            dialog.showAndWait();
-            return connectConfigDialogController.isOkClicked();
+            Stage dialogStage = new Stage();
+            dialogStage.setTitle("添加配置");
+            dialogStage.initModality(Modality.WINDOW_MODAL);
+            Scene scene = new Scene(page);
+            dialogStage.setScene(scene);
+            ConnectConfigDialogController controller = loader.getController();
+            controller.setDialogStage(dialogStage);
+            controller.setConfig(connectConfig);
+            dialogStage.showAndWait();
+            return controller.isOkClicked();
         } catch (IOException e) {
             log.error("", e);
         }
