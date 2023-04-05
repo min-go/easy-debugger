@@ -1,4 +1,4 @@
-package io.dengliming.easydebugger.utils;
+package io.dengliming.easydebugger.constant;
 
 public enum ConnectType {
     TCP_CLIENT,

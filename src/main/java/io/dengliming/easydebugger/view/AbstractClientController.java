@@ -4,7 +4,7 @@ import io.dengliming.easydebugger.model.ChatMsgBox;
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.*;
 import io.dengliming.easydebugger.utils.ConfigStorage;
-import io.dengliming.easydebugger.utils.ConnectType;
+import io.dengliming.easydebugger.constant.ConnectType;
 import io.dengliming.easydebugger.utils.SocketDebugCache;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
@@ -92,6 +92,10 @@ public abstract class AbstractClientController implements IClientEventListener, 
 
             ConnectConfig selectedItem = selectSingleConfig();
             if (selectedItem == null) {
+                return;
+            }
+
+            if (!verifyConnectStatus()) {
                 return;
             }
 
@@ -260,6 +264,10 @@ public abstract class AbstractClientController implements IClientEventListener, 
 
     protected void setStatusText(Text text) {
 
+    }
+
+    protected boolean verifyConnectStatus() {
+        return true;
     }
 
     protected void setClientStatus(boolean online) {}

@@ -125,7 +125,11 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
     }
 
     public ChannelFuture writeAndFlush(Object msg, Object... args) {
-        if (this.getChannel() == null || !this.getChannel().isActive()) {
+        return writeAndFlush(msg, false, args);
+    }
+
+    public ChannelFuture writeAndFlush(Object msg, boolean reconnect, Object... args) {
+        if ((this.getChannel() == null || !this.getChannel().isActive()) && reconnect) {
             try {
                 // 尝试重连, 并且等待
                 return connect((arg) -> {
@@ -151,7 +155,7 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
             } catch (Exception e) {
                 throw new ProtocolException("写报文尝试重连失败 " + e.getMessage(), e);
             }
-        } else if (this.getChannel().isWritable()) {
+        } else if (this.getChannel() != null && this.getChannel().isWritable()) {
             return this.getChannel().writeAndFlush(msg);
         } else {
             return this.getChannel().newFailedFuture(new UnWritableProtocolException());

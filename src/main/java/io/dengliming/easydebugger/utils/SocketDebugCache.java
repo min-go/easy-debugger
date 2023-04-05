@@ -2,10 +2,7 @@ package io.dengliming.easydebugger.utils;
 
 import io.dengliming.easydebugger.model.ChatMsgBox;
 import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.netty.AbstractSocketClient;
-import io.dengliming.easydebugger.netty.IClientEventListener;
-import io.dengliming.easydebugger.netty.TcpDebuggerClient;
-import io.dengliming.easydebugger.netty.UdpDebuggerClient;
+import io.dengliming.easydebugger.netty.*;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -83,11 +80,17 @@ public enum SocketDebugCache {
         if (MSG_BOX_CACHE.containsKey(clientId)) {
             MSG_BOX_CACHE.get(clientId).onLine();
         }
+        if (CLIENT_CACHE.containsKey(clientId)) {
+            ((SocketDebuggerClient) CLIENT_CACHE.get(clientId)).setStopScheduled(false);
+        }
     }
 
     public void setChatMsgBoxOffline(String clientId) {
         if (MSG_BOX_CACHE.containsKey(clientId)) {
             MSG_BOX_CACHE.get(clientId).onOffline();
+        }
+        if (CLIENT_CACHE.containsKey(clientId)) {
+            ((SocketDebuggerClient) CLIENT_CACHE.get(clientId)).setStopScheduled(true);
         }
     }
 

@@ -1,7 +1,7 @@
 package io.dengliming.easydebugger.model;
 
 import io.dengliming.easydebugger.netty.MsgType;
-import io.dengliming.easydebugger.utils.ConnectType;
+import io.dengliming.easydebugger.constant.ConnectType;
 
 import java.util.UUID;
 

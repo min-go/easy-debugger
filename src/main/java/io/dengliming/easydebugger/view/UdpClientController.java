@@ -1,6 +1,6 @@
 package io.dengliming.easydebugger.view;
 
-import io.dengliming.easydebugger.utils.ConnectType;
+import io.dengliming.easydebugger.constant.ConnectType;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
