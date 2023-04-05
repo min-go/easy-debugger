@@ -22,6 +22,7 @@ public class MainController implements Initializable {
         // 添加两个Tab，每个Tab对应一个Controller
         addTab("tcp-client-view", new TcpClientController());
         addTab("tcp-server-view", new TcpServerController());
+        addTab("udp-client-view", new UdpClientController());
         Tooltips.INSTANCE.setOwnerNode(tabPane);
     }
 

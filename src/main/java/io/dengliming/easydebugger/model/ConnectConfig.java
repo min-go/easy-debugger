@@ -1,6 +1,7 @@
 package io.dengliming.easydebugger.model;
 
 import io.dengliming.easydebugger.netty.MsgType;
+import io.dengliming.easydebugger.utils.ConnectType;
 
 import java.util.UUID;
 
@@ -11,6 +12,9 @@ public class ConnectConfig {
     private int port;
     private String name;
     private boolean repeatSend;
+
+    // 连接类型
+    private ConnectType connectType = ConnectType.TCP_CLIENT;
 
     //--------------重复发送使用属性start--------------
     private int sendInterval;
@@ -87,5 +91,13 @@ public class ConnectConfig {
 
     public void setRepeatSendMsg(String repeatSendMsg) {
         this.repeatSendMsg = repeatSendMsg;
+    }
+
+    public ConnectType getConnectType() {
+        return connectType;
+    }
+
+    public void setConnectType(ConnectType connectType) {
+        this.connectType = connectType;
     }
 }

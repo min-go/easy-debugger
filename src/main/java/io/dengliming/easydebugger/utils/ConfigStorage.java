@@ -92,4 +92,11 @@ public enum ConfigStorage {
     public List<ConnectConfig> getConnectConfigs() {
         return connectConfigMap.values().stream().collect(Collectors.toList());
     }
+
+    public List<ConnectConfig> getConnectConfigs(ConnectType connectType) {
+        return connectConfigMap.values()
+                .stream()
+                .filter(it -> it.getConnectType() == connectType)
+                .collect(Collectors.toList());
+    }
 }

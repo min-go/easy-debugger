@@ -5,13 +5,14 @@ import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.AbstractSocketClient;
 import io.dengliming.easydebugger.netty.IClientEventListener;
 import io.dengliming.easydebugger.netty.TcpDebuggerClient;
+import io.dengliming.easydebugger.netty.UdpDebuggerClient;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public enum TcpDebugCache {
+public enum SocketDebugCache {
     INSTANCE;
 
     private final Map<String, AbstractSocketClient> CLIENT_CACHE = new ConcurrentHashMap<>();
@@ -27,7 +28,17 @@ public enum TcpDebugCache {
             if (client != null) {
                 return client;
             }
-            client = new TcpDebuggerClient(config, clientEventListener);
+
+            switch (config.getConnectType()) {
+                case TCP_CLIENT:
+                    client = new TcpDebuggerClient(config, clientEventListener);
+                    break;
+                case UDP_CLIENT:
+                    client = new UdpDebuggerClient(config, clientEventListener);
+                    break;
+                default:
+                    throw new RuntimeException("Unsupported client type " + config.getConnectType().name());
+            }
             CLIENT_CACHE.put(config.getUid(), client);
             client.init();
         }
