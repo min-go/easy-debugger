@@ -1,6 +1,5 @@
 package io.dengliming.easydebugger.view;
 
-import io.dengliming.easydebugger.utils.Tooltips;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -23,7 +22,6 @@ public class MainController implements Initializable {
         addTab("tcp-client-view", new TcpClientController());
         addTab("tcp-server-view", new TcpServerController());
         addTab("udp-client-view", new UdpClientController());
-        Tooltips.INSTANCE.setOwnerNode(tabPane);
     }
 
     private void addTab(String title, Object controller) {
@@ -34,7 +32,7 @@ public class MainController implements Initializable {
             Tab tab = loader.load();
             tabPane.getTabs().add(tab);
         } catch (Exception e) {
-            log.error("addTab error.", e);
+            log.error("addTab({}) error.", title, e);
         }
     }
 }

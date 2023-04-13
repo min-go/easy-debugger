@@ -1,5 +1,8 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.netty.client;
 
+import io.dengliming.easydebugger.netty.event.ExceptionEvent;
+import io.dengliming.easydebugger.netty.event.ClientInactiveEvent;
+import io.dengliming.easydebugger.netty.event.ClientReadMessageEvent;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 
@@ -13,18 +16,18 @@ public class ClientChannelHandler extends SimpleChannelInboundHandler {
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Object o) {
         String connectKey = client.getConfig().getConnectKey();
-        client.getClientEventListener().onClientEvent(new ClientReadMessageEvent(connectKey, o));
+        client.getClientEventListener().onEvent(new ClientReadMessageEvent(connectKey, o));
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
         String connectKey = client.getConfig().getConnectKey();
-        client.getClientEventListener().onClientEvent(new ClientExceptionEvent(connectKey, cause));
+        client.getClientEventListener().onEvent(new ExceptionEvent(connectKey, cause));
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         String connectKey = client.getConfig().getConnectKey();
-        client.getClientEventListener().onClientEvent(new ClientInactiveEvent(connectKey));
+        client.getClientEventListener().onEvent(new ClientInactiveEvent(connectKey));
     }
 }

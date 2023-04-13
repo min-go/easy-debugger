@@ -1,5 +1,10 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.netty.client;
 
+import io.dengliming.easydebugger.netty.ConnectProperties;
+import io.dengliming.easydebugger.netty.ProtocolException;
+import io.dengliming.easydebugger.netty.UnWritableProtocolException;
+import io.dengliming.easydebugger.netty.event.ClientOnlineEvent;
+import io.dengliming.easydebugger.netty.event.IGenericEventListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -9,16 +14,18 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.function.Consumer;
 
+import static io.dengliming.easydebugger.constant.CommonConstant.*;
+
 @Slf4j
 public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup> {
 
-    private final ClientConnectProperties config;
-    private final IClientEventListener clientEventListener;
+    private final ConnectProperties config;
+    private final IGenericEventListener clientEventListener;
     private Channel channel;
     private Bootstrap bootstrap;
     private EventLoopGroup workerGroup;
 
-    public AbstractSocketClient(ClientConnectProperties config, IClientEventListener clientEventListener) {
+    public AbstractSocketClient(ConnectProperties config, IGenericEventListener clientEventListener) {
         this.config = config;
         this.clientEventListener = clientEventListener;
     }
@@ -43,11 +50,11 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
                         ChannelPipeline pipeline = channel.pipeline();
 
                         // 设置客户端编解码器
-                        pipeline.addFirst("ClientProtocolDecoder", createProtocolDecoder());
-                        pipeline.addFirst("ClientProtocolEncoder", createProtocolEncoder());
+                        pipeline.addFirst(CLIENT_PROTOCOL_DECODER, createProtocolDecoder());
+                        pipeline.addFirst(CLIENT_PROTOCOL_ENCODER, createProtocolEncoder());
 
                         // 业务处理器新增到最后
-                        pipeline.addLast("ClientServiceHandler", new ClientChannelHandler(AbstractSocketClient.this));
+                        pipeline.addLast(CLIENT_SERVICE_HANDLER, new ClientChannelHandler(AbstractSocketClient.this));
 
                         // 自定义处理器
                         AbstractSocketClient.this.doInitChannel(channel);
@@ -70,6 +77,9 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
                     if (future.isSuccess()) {
                         log.info("客户端标识：{} - 远程主机 {}:{} - 连接服务器成功", getConfig().getConnectKey(),
                                 this.getHost(), this.getPort());
+                    } else {
+                        log.error("客户端标识：{} - 远程主机 {}:{} - 连接服务器失败", getConfig().getConnectKey(),
+                                this.getHost(), this.getPort(), future.cause());
                     }
                 } : (Consumer<ChannelFuture>) consumer, timeout);
             } else {
@@ -104,7 +114,7 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
     }
 
     protected void successCallback(ChannelFuture future) {
-        clientEventListener.onClientEvent(new ClientOnlineEvent(getConfig().getConnectKey()));
+        clientEventListener.onEvent(new ClientOnlineEvent(getConfig().getConnectKey()));
     }
 
     /**
@@ -129,7 +139,10 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
     }
 
     public ChannelFuture writeAndFlush(Object msg, boolean reconnect, Object... args) {
-        if ((this.getChannel() == null || !this.getChannel().isActive()) && reconnect) {
+        if ((this.getChannel() == null || !this.getChannel().isActive())) {
+            if (!reconnect) {
+                return null;
+            }
             try {
                 // 尝试重连, 并且等待
                 return connect((arg) -> {
@@ -181,7 +194,7 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
         return getConfig().getPort();
     }
 
-    public ClientConnectProperties getConfig() {
+    public ConnectProperties getConfig() {
         return config;
     }
 
@@ -205,7 +218,7 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
      */
     protected abstract ChannelOutboundHandlerAdapter createProtocolEncoder();
 
-    public IClientEventListener getClientEventListener() {
+    public IGenericEventListener getClientEventListener() {
         return clientEventListener;
     }
 

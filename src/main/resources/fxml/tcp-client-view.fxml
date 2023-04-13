@@ -4,6 +4,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.shape.Circle?>
 <Tab closable="false" text="TCP客户端" xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <HBox>
@@ -28,9 +29,13 @@
                 </bottom>
             </BorderPane>
 
-            <BorderPane>
+            <BorderPane HBox.hgrow="ALWAYS">
                 <top>
                     <VBox>
+                        <HBox alignment="CENTER_LEFT" spacing="10">
+                            <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
+                            <Text fx:id="clientName" style="-fx-font-size: 16px;">--</Text>
+                        </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
                             <Label text="主机："></Label>
@@ -41,7 +46,7 @@
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
-                            <Label text="连接状态："></Label>
+                            <Circle fx:id="statusCircle" radius="5.0" fill="darkgrey" stroke="#0000" />
                             <Text fx:id="statusText" text="未连接" fill="red"></Text>
                             <Button fx:id="clearBtn" text="清空消息"></Button>
                         </HBox>

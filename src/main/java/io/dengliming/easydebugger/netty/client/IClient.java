@@ -1,4 +1,4 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.netty.client;
 
 
 import java.util.function.Consumer;

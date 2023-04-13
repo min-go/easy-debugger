@@ -1,5 +1,6 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.netty.codec;
 
+import io.dengliming.easydebugger.netty.IMessage;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.MessageToMessageEncoder;

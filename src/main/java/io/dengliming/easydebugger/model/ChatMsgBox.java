@@ -1,14 +1,15 @@
 package io.dengliming.easydebugger.model;
 
-import io.dengliming.easydebugger.utils.DateUtils;
-import io.dengliming.easydebugger.utils.SceneUtils;
+import io.dengliming.easydebugger.utils.T;
+import io.dengliming.easydebugger.view.NoSelectionModel;
 import javafx.application.Platform;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 
@@ -17,8 +18,10 @@ import java.time.LocalDateTime;
 
 public class ChatMsgBox {
 
-    private String clientId;
-    private Text statusText;
+    private static final Font CONTENT_FONT = new Font(13);
+    private static final Font TIME_FONT = new Font(10);
+
+    private boolean online;
 
     private ListView<Object> contentListView;
 
@@ -26,20 +29,19 @@ public class ChatMsgBox {
         this.contentListView = new ListView<>();
         StackPane stackPane = new StackPane();
         Label emptyLabel = new Label("暂无数据...");
-        emptyLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: gray;");
+        emptyLabel.setStyle("-fx-text-fill: gray;");
         stackPane.getChildren().add(emptyLabel);
         this.contentListView.setPlaceholder(stackPane);
-        this.statusText = new Text("未连接");
-        this.statusText.setFill(Paint.valueOf("red"));
+        this.contentListView.setSelectionModel(new NoSelectionModel<>());
     }
 
     public ChatMsgBox addLeftMsg(String message) {
-        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), true)));
+        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, T.format(LocalDateTime.now()), true)));
         return this;
     }
 
     public ChatMsgBox addRightMsg(String message) {
-        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, DateUtils.format(LocalDateTime.now()), false)));
+        Platform.runLater(() -> contentListView.getItems().add(buildMessage(message, T.format(LocalDateTime.now()), false)));
         return this;
     }
 
@@ -52,13 +54,27 @@ public class ChatMsgBox {
         Label content = new Label();
         content.setText(message);
         content.setWrapText(true);
-        content.setPrefWidth(SceneUtils.getWidth(message));
-        content.setFont(new Font(13));
-        Label time1 = new Label();
-        time1.setText(timestamp);
-        time1.setFont(new Font(10));
-        VBox vBox = new VBox(content, time1);
+        content.setPrefHeight(Region.USE_COMPUTED_SIZE);
+        content.setFont(CONTENT_FONT);
+        content.setStyle("-fx-background-color: #f0f0f0;-fx-background-radius: 10px;");
+        content.setPadding(new Insets(5));
+
+        // 计算字符宽度
+        Text text = new Text(message);
+        text.setFont(CONTENT_FONT);
+        // 这里加上内边距
+        double width = text.getLayoutBounds().getWidth() + 10;
+
+        // 设置Label的最大宽度
+        content.setMaxWidth(width > 450 ? 450 : width);
+
+        Label time = new Label();
+        time.setText(timestamp);
+        time.setFont(TIME_FONT);
+        time.setWrapText(true);
+        VBox vBox = new VBox(content, time);
         vBox.setSpacing(5);
+
         if (left) {
             content.setAlignment(Pos.CENTER_LEFT);
             vBox.setAlignment(Pos.CENTER_LEFT);
@@ -67,25 +83,17 @@ public class ChatMsgBox {
             vBox.setAlignment(Pos.CENTER_RIGHT);
         }
 
+        vBox.maxWidthProperty().bind(contentListView.widthProperty());
         vBox.setFillWidth(true);
         return vBox;
     }
 
-    public Text getStatusText() {
-        return statusText;
+    public boolean isOnline() {
+        return online;
     }
 
-    private void setStatus(String text, Paint v) {
-        this.statusText.setText(text);
-        this.statusText.setFill(v);
-    }
-
-    public void onOffline() {
-        setStatus("未连接", Paint.valueOf("red"));
-    }
-
-    public void onLine() {
-        setStatus("已连接", Paint.valueOf("green"));
+    public void setOnline(boolean online) {
+        this.online = online;
     }
 
     public ListView<Object> getContentListView() {
@@ -95,4 +103,5 @@ public class ChatMsgBox {
     public void setContentListView(ListView<Object> contentListView) {
         this.contentListView = contentListView;
     }
+
 }

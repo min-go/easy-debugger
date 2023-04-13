@@ -1,7 +1,7 @@
 package io.dengliming.easydebugger.model;
 
-import io.dengliming.easydebugger.netty.MsgType;
 import io.dengliming.easydebugger.constant.ConnectType;
+import io.dengliming.easydebugger.netty.MsgType;
 
 import java.util.UUID;
 
@@ -11,17 +11,30 @@ public class ConnectConfig {
     private String host;
     private int port;
     private String name;
+    /**
+     * 是否重复发送（客户端使用）
+     */
     private boolean repeatSend;
+    /**
+     * 是否自动回复（服务端使用）
+     */
+    private boolean autoReply;
 
     // 连接类型
     private ConnectType connectType = ConnectType.TCP_CLIENT;
 
-    //--------------重复发送使用属性start--------------
+    /**
+     * 发送间隔（配合重复发送使用）
+     */
     private int sendInterval;
-    private MsgType repeatSendMsgType;
-    private String repeatSendMsg;
-    //--------------重复发送使用属性end--------------
-
+    /**
+     * 发送消息类型
+     */
+    private MsgType sendMsgType;
+    /**
+     * 发送消息
+     */
+    private String sendMsg;
 
     public ConnectConfig() {
         this.uid = UUID.randomUUID().toString().replaceAll("-", "");
@@ -77,20 +90,20 @@ public class ConnectConfig {
         this.sendInterval = sendInterval;
     }
 
-    public MsgType getRepeatSendMsgType() {
-        return repeatSendMsgType;
+    public MsgType getSendMsgType() {
+        return sendMsgType;
     }
 
-    public void setRepeatSendMsgType(MsgType repeatSendMsgType) {
-        this.repeatSendMsgType = repeatSendMsgType;
+    public void setSendMsgType(MsgType sendMsgType) {
+        this.sendMsgType = sendMsgType;
     }
 
-    public String getRepeatSendMsg() {
-        return repeatSendMsg;
+    public String getSendMsg() {
+        return sendMsg;
     }
 
-    public void setRepeatSendMsg(String repeatSendMsg) {
-        this.repeatSendMsg = repeatSendMsg;
+    public void setSendMsg(String sendMsg) {
+        this.sendMsg = sendMsg;
     }
 
     public ConnectType getConnectType() {
@@ -99,5 +112,13 @@ public class ConnectConfig {
 
     public void setConnectType(ConnectType connectType) {
         this.connectType = connectType;
+    }
+
+    public boolean isAutoReply() {
+        return autoReply;
+    }
+
+    public void setAutoReply(boolean autoReply) {
+        this.autoReply = autoReply;
     }
 }

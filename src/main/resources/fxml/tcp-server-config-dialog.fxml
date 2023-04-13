@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.ConnectConfigDialogController">
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.TcpServerConfigDialogController">
     <content>
         <VBox spacing="10" alignment="CENTER_RIGHT">
             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
@@ -22,15 +22,11 @@
                 <TextField fx:id="portField" GridPane.columnIndex="1" GridPane.rowIndex="2" prefWidth="300"></TextField>
             </HBox>
             <HBox spacing="5">
-                <Label text="重复发送：" GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="100" alignment="CENTER_RIGHT"></Label>
-                <CheckBox fx:id="repeatSendBox" GridPane.columnIndex="1" GridPane.rowIndex="3"></CheckBox>
+                <Label text="自动回复：" GridPane.columnIndex="0" GridPane.rowIndex="3" prefWidth="100" alignment="CENTER_RIGHT"></Label>
+                <CheckBox fx:id="autoReplyBox" GridPane.columnIndex="1" GridPane.rowIndex="3"></CheckBox>
             </HBox>
-            <HBox spacing="5" visible="${repeatSendBox.selected}">
-                <Label text="发送间隔（s）：" GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="100" alignment="CENTER_RIGHT"></Label>
-                <TextField fx:id="sendIntervalField" promptText="每隔多少秒发送一次" GridPane.columnIndex="1" GridPane.rowIndex="4" prefWidth="300"></TextField>
-            </HBox>
-            <HBox spacing="5" visible="${repeatSendBox.selected}">
-                <Label text="发送内容：" GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="100" alignment="CENTER_RIGHT"></Label>
+            <HBox spacing="5" visible="${autoReplyBox.selected}">
+                <Label text="回复内容：" GridPane.columnIndex="0" GridPane.rowIndex="4" prefWidth="100" alignment="CENTER_RIGHT"></Label>
                 <ComboBox fx:id="msgTypeComboBox" GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="90">
                     <items>
                         <FXCollections fx:factory="observableArrayList">
@@ -42,7 +38,7 @@
                         <String fx:value="字符串"/>
                     </value>
                 </ComboBox>
-                <TextField fx:id="repeatSendMsg" GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="210"></TextField>
+                <TextField fx:id="replyMsg" GridPane.columnIndex="2" GridPane.rowIndex="3" prefWidth="210"></TextField>
             </HBox>
             <HBox spacing="10" alignment="CENTER_RIGHT">
                 <Button fx:id="submitBtn" text="取消" prefWidth="70" onAction="#handleCancel"></Button>

@@ -18,10 +18,17 @@ import java.util.stream.Collectors;
 public enum ConfigStorage {
     INSTANCE;
 
-    private static final String CONNECT_CONFIG_FILE_PATH = System.getProperty("user.home") + "/Documents/EasyDebugger/";
-    private static final String CONNECT_CONFIG_FILE = "connect-config.xml";
-    private static final String EMPTY_CONFIG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<connectConfigs></connectConfigs>";
+    private final String CONNECT_CONFIG_FILE_PATH = System.getProperty("user.home") + "/Documents/EasyDebugger/";
+    private final String CONNECT_CONFIG_FILE = "connect-config.xml";
+    private final String EMPTY_CONFIG_XML = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n<connectConfigs></connectConfigs>";
     private final Map<String, ConnectConfig> connectConfigMap = new LinkedHashMap<>();
+
+    ConfigStorage() {
+        File file = getConnectConfigFile();
+        if (file != null && file.exists()) {
+            loadConnectConfigDataFromFile(file);
+        }
+    }
 
     public void loadConnectConfigDataFromFile(File file) {
         try {
@@ -90,6 +97,11 @@ public enum ConfigStorage {
         flushDb();
     }
 
+    public void removeAll(List<String> config) {
+        config.forEach(c -> connectConfigMap.remove(c));
+        flushDb();
+    }
+
     public List<ConnectConfig> getConnectConfigs() {
         return connectConfigMap.values().stream().collect(Collectors.toList());
     }
@@ -99,5 +111,9 @@ public enum ConfigStorage {
                 .stream()
                 .filter(it -> it.getConnectType() == connectType)
                 .collect(Collectors.toList());
+    }
+
+    public ConnectConfig getConnectConfig(String id) {
+        return id == null ? null : connectConfigMap.get(id);
     }
 }

@@ -6,7 +6,6 @@ import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.T;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
@@ -15,7 +14,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class ConnectConfigDialogController implements Initializable {
+public class TcpServerConfigDialogController implements Initializable {
 
     private boolean isOkClicked;
 
@@ -28,11 +27,9 @@ public class ConnectConfigDialogController implements Initializable {
     @FXML
     private ComboBox<String> msgTypeComboBox;
     @FXML
-    private CheckBox repeatSendBox;
+    private CheckBox autoReplyBox;
     @FXML
-    private TextField sendIntervalField;
-    @FXML
-    private TextField repeatSendMsg;
+    private TextField replyMsg;
 
     private ConnectConfig config;
     private Stage dialogStage;
@@ -52,16 +49,12 @@ public class ConnectConfigDialogController implements Initializable {
             config.setName(nameField.getText());
             config.setHost(hostField.getText());
             config.setPort(Integer.parseInt(portField.getText()));
-            config.setRepeatSend(repeatSendBox.isSelected());
+            config.setAutoReply(autoReplyBox.isSelected());
             String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
             if (msgType != null) {
                 config.setSendMsgType(MsgType.getByName(msgType));
             }
-            config.setSendMsg(repeatSendMsg.getText());
-            String sendInterval = sendIntervalField.getText();
-            if (sendInterval != null && sendInterval.length() > 0) {
-                config.setSendInterval(Integer.parseInt(sendInterval));
-            }
+            config.setSendMsg(replyMsg.getText());
         }
 
         this.isOkClicked = true;
@@ -85,9 +78,8 @@ public class ConnectConfigDialogController implements Initializable {
         if (config.getSendMsgType() != null) {
             msgTypeComboBox.setValue(config.getSendMsgType().getName());
         }
-        repeatSendBox.setSelected(config.isRepeatSend());
-        repeatSendMsg.setText(config.getSendMsg());
-        sendIntervalField.setText(String.valueOf(config.getSendInterval()));
+        autoReplyBox.setSelected(config.isAutoReply());
+        replyMsg.setText(config.getSendMsg());
     }
 
     public boolean isOkClicked() {
@@ -104,12 +96,10 @@ public class ConnectConfigDialogController implements Initializable {
             errorMessage = "请输入0~65535端口号！";
         }
 
-        // 如果选中重复发送
-        else if (repeatSendBox.isSelected()) {
-            if (sendIntervalField.getText() == null || sendIntervalField.getText().length() == 0) {
-                errorMessage = "请输入重复发送的间隔！";
-            } else if (repeatSendMsg.getText() == null || repeatSendMsg.getText().length() == 0) {
-                errorMessage = "请输入重复发送的内容！";
+        // 如果选中自动回复
+        else if (autoReplyBox.isSelected()) {
+            if (replyMsg.getText() == null || replyMsg.getText().length() == 0) {
+                errorMessage = "请输入回复的内容！";
             }
         }
 

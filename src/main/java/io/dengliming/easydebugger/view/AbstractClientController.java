@@ -1,11 +1,16 @@
 package io.dengliming.easydebugger.view;
 
-import io.dengliming.easydebugger.model.ChatMsgBox;
-import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.netty.*;
-import io.dengliming.easydebugger.utils.ConfigStorage;
+import io.dengliming.easydebugger.constant.CommonConstant;
 import io.dengliming.easydebugger.constant.ConnectType;
-import io.dengliming.easydebugger.utils.SocketDebugCache;
+import io.dengliming.easydebugger.model.ChatMsgBox;
+import io.dengliming.easydebugger.model.ClientDebugger;
+import io.dengliming.easydebugger.model.ConnectConfig;
+import io.dengliming.easydebugger.netty.MsgType;
+import io.dengliming.easydebugger.netty.client.TcpDebuggerClient;
+import io.dengliming.easydebugger.netty.event.*;
+import io.dengliming.easydebugger.utils.Alerts;
+import io.dengliming.easydebugger.utils.ConfigStorage;
+import io.dengliming.easydebugger.utils.SocketDebuggerCache;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -19,7 +24,6 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import lombok.extern.slf4j.Slf4j;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -27,7 +31,7 @@ import java.util.List;
 import java.util.ResourceBundle;
 
 @Slf4j
-public abstract class AbstractClientController implements IClientEventListener, Initializable {
+public abstract class AbstractClientController implements IGenericEventListener<ChannelEvent>, Initializable {
     @FXML
     private ListView connectConfigListView;
     @FXML
@@ -52,6 +56,8 @@ public abstract class AbstractClientController implements IClientEventListener, 
     private RadioButton hexMsgOption;
     @FXML
     private ScrollPane msgContentPane;
+    @FXML
+    private Text clientName;
     private ToggleGroup group;
 
     @Override
@@ -90,8 +96,9 @@ public abstract class AbstractClientController implements IClientEventListener, 
                 return;
             }
 
-            ConnectConfig selectedItem = selectSingleConfig();
+            ConnectConfig selectedItem = getSelectedConnectConfig();
             if (selectedItem == null) {
+                Alerts.showWarning("请选择一个连接", null);
                 return;
             }
 
@@ -100,8 +107,8 @@ public abstract class AbstractClientController implements IClientEventListener, 
             }
 
             try {
-                TcpDebuggerClient client = (TcpDebuggerClient) SocketDebugCache.INSTANCE.getOrCreateClient(selectedItem, this);
-                client.sendMsg(hexMsgOption.isSelected() ? MsgType.HEX : MsgType.STRING, message);
+                ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedItem, this);
+                ((TcpDebuggerClient) (clientDebugger.getClient())).sendMsg(hexMsgOption.isSelected() ? MsgType.HEX : MsgType.STRING, message);
             } catch (Exception e) {
                 log.error("connect error.", e);
             }
@@ -114,9 +121,7 @@ public abstract class AbstractClientController implements IClientEventListener, 
         deleteBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             ObservableList selectedItems = connectConfigListView.getSelectionModel().getSelectedItems();
             if (selectedItems == null || selectedItems.size() == 0) {
-                Alert alert = new Alert(Alert.AlertType.WARNING);
-                alert.setHeaderText("请选择要删除的连接！");
-                alert.showAndWait();
+                Alerts.showWarning("请选择要删除的连接！", null);
                 return;
             }
 
@@ -124,24 +129,18 @@ public abstract class AbstractClientController implements IClientEventListener, 
             for (Object selectedItem : selectedItems) {
                 clientList.add(((ConnectConfig) selectedItem).getUid());
             }
-            ConfigStorage.INSTANCE.removeAll(selectedItems);
             connectConfigListView.getItems().removeAll(selectedItems);
-
-            for (String clientId : clientList) {
-                SocketDebugCache.INSTANCE.removeCache(clientId);
-            }
-
-            hostField.clear();
-            portField.clear();
-            setClientStatus(false);
+            ConfigStorage.INSTANCE.removeAll(clientList);
+            clientList.forEach(SocketDebuggerCache.INSTANCE::removeClientCache);
         });
     }
 
     private void initAddBtn() {
         addBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             ConnectConfig tmpConfig = new ConnectConfig();
-            boolean result = showConnectConfigEditDialog(tmpConfig);
-            if (result) {
+            tmpConfig.setConnectType(connectType());
+            boolean isOk = showConnectConfigEditDialog(tmpConfig);
+            if (isOk) {
                 connectConfigListView.getItems().add(tmpConfig);
                 ConfigStorage.INSTANCE.add(tmpConfig);
             }
@@ -150,21 +149,27 @@ public abstract class AbstractClientController implements IClientEventListener, 
 
     private void initEditBtn() {
         editBtn.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
-            ConnectConfig selectedItem = selectSingleConfig();
+            ConnectConfig selectedItem = getSelectedConnectConfig();
             if (selectedItem == null) {
+                Alerts.showWarning("请选择一个连接", null);
                 return;
             }
             int selectedIndex = connectConfigListView.getSelectionModel().getSelectedIndex();
 
-            boolean result = showConnectConfigEditDialog(selectedItem);
-            if (result) {
+            boolean isOk = showConnectConfigEditDialog(selectedItem);
+            if (isOk) {
                 connectConfigListView.getItems().set(selectedIndex, selectedItem);
+                // 这里因为修改元素之后会自动取消选中，这里重新选中
+                connectConfigListView.getSelectionModel().select(selectedIndex);
 
                 hostField.setText(selectedItem.getHost());
                 portField.setText(String.valueOf(selectedItem.getPort()));
 
                 // 重新编辑之后重置连接
-                SocketDebugCache.INSTANCE.disconnectClient(selectedItem.getUid());
+                ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(selectedItem.getUid());
+                if (clientDebugger != null) {
+                    clientDebugger.disconnectClient();
+                }
                 setClientStatus(false);
 
                 ConfigStorage.INSTANCE.set(selectedItem);
@@ -194,76 +199,78 @@ public abstract class AbstractClientController implements IClientEventListener, 
         return false;
     }
 
-    protected ConnectConfig selectSingleConfig() {
-        ConnectConfig selectedItem = (ConnectConfig) connectConfigListView.getSelectionModel().getSelectedItem();
-        if (selectedItem == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setHeaderText("请选择一个连接");
-            alert.showAndWait();
-        }
-        return selectedItem;
-    }
-
     @Override
-    public void onClientEvent(ClientEvent event) {
+    public void onEvent(ChannelEvent event) {
         Platform.runLater(() -> {
             String clientId = event.getSource().toString();
+            ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(clientId);
             if (event instanceof ClientReadMessageEvent) {
                 ClientReadMessageEvent msgEvent = (ClientReadMessageEvent) event;
-                SocketDebugCache.INSTANCE.addLeftMsg(clientId, msgEvent.getMsg().toString());
+                if (clientDebugger != null) {
+                    clientDebugger.addLeftMsg(msgEvent.getMsg().toString());
+                }
                 return;
             }
 
             if (event instanceof ClientInactiveEvent) {
-                ConnectConfig selectedConfig = selectSingleConfig();
+                ConnectConfig selectedConfig = getSelectedConnectConfig();
                 if (selectedConfig != null && clientId.equals(selectedConfig.getUid())) {
                     setClientStatus(false);
                 }
-                SocketDebugCache.INSTANCE.setChatMsgBoxOffline(clientId);
+                if (clientDebugger != null) {
+                    clientDebugger.offline();
+                }
                 return;
             }
 
             if (event instanceof ClientOnlineEvent) {
-                ConnectConfig selectedConfig = selectSingleConfig();
+                ConnectConfig selectedConfig = getSelectedConnectConfig();
                 if (selectedConfig != null && clientId.equals(selectedConfig.getUid())) {
                     setClientStatus(true);
                 }
-                SocketDebugCache.INSTANCE.setChatMsgBoxOnline(clientId);
+
+                if (clientDebugger != null) {
+                    clientDebugger.online();
+                }
                 return;
             }
 
-            if (event instanceof ClientExceptionEvent) {
+            if (event instanceof ExceptionEvent) {
                 // TODO
-                log.error("", ((ClientExceptionEvent) event).getCause());
+                log.error("", ((ExceptionEvent) event).getCause());
             }
         });
     }
 
     private void initConnectConfigListView() {
-        File file = ConfigStorage.INSTANCE.getConnectConfigFile();
-        if (file != null && file.exists()) {
-            ConfigStorage.INSTANCE.loadConnectConfigDataFromFile(file);
-        }
         connectConfigListView.setCellFactory(param -> new ConnectConfigCell());
         connectConfigListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue == null) {
+                hostField.clear();
+                portField.clear();
+                clientName.setText("--");
+                setClientStatus(false);
                 return;
             }
-            // TODO 判断是否改变
+
             hostField.setText(((ConnectConfig) newValue).getHost());
             portField.setText(String.valueOf(((ConnectConfig) newValue).getPort()));
+            clientName.setText(((ConnectConfig) newValue).getName());
 
             // 填充聊天框
-            String key = ((ConnectConfig) newValue).getUid();
-            ChatMsgBox chatMsgBox = SocketDebugCache.INSTANCE.getOrCreateChatMsgBox(key);
+            ChatMsgBox chatMsgBox = SocketDebuggerCache.INSTANCE
+                    .getOrCreateClient((ConnectConfig) newValue, this)
+                    .getChatMsgBox();
             msgContentPane.setContent(chatMsgBox.getContentListView());
-            setStatusText(chatMsgBox.getStatusText());
+            setClientStatus(chatMsgBox.isOnline());
         });
         connectConfigListView.getItems().addAll(ConfigStorage.INSTANCE.getConnectConfigs(connectType()));
+        connectConfigListView.getSelectionModel().select(0);
+        connectConfigListView.setStyle(CommonConstant.SELECTION_STYLE);
     }
 
-    protected void setStatusText(Text text) {
-
+    protected ConnectConfig getSelectedConnectConfig() {
+        return (ConnectConfig) connectConfigListView.getSelectionModel().getSelectedItem();
     }
 
     protected boolean verifyConnectStatus() {
@@ -271,7 +278,6 @@ public abstract class AbstractClientController implements IClientEventListener, 
     }
 
     protected void setClientStatus(boolean online) {}
-
 
     protected abstract ConnectType connectType();
 }

@@ -1,6 +1,7 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.netty.client;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
+import io.dengliming.easydebugger.netty.event.IGenericEventListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelOption;
@@ -10,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class UdpDebuggerClient extends SocketDebuggerClient {
 
-    public UdpDebuggerClient(ConnectConfig config, IClientEventListener clientEventListener) {
+    public UdpDebuggerClient(ConnectConfig config, IGenericEventListener clientEventListener) {
         super(config, clientEventListener);
     }
 

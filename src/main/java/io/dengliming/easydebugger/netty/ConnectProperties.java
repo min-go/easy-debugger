@@ -3,7 +3,7 @@ package io.dengliming.easydebugger.netty;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-public class ClientConnectProperties {
+public class ConnectProperties {
     /**
      * 主机
      */
@@ -21,7 +21,7 @@ public class ClientConnectProperties {
 
     private long connectTimeoutMillisecond = 3000;
 
-    public ClientConnectProperties(String host, Integer port, String connectKey) {
+    public ConnectProperties(String host, Integer port, String connectKey) {
         this.host = host;
         this.port = port;
         this.connectKey = connectKey;
