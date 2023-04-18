@@ -122,6 +122,9 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
      */
     @Override
     public ChannelFuture disconnect() {
+        if (this.channel == null) {
+            return null;
+        }
         return this.channel.disconnect().addListener(future -> {
             if (future.isSuccess()) {
                 if (log.isDebugEnabled()) {
@@ -224,8 +227,9 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
 
     @Override
     public void destroy() {
-        if (null == channel) return;
-        channel.close();
+        if (null != channel) {
+            channel.close();
+        }
         workerGroup.shutdownGracefully();
     }
 }

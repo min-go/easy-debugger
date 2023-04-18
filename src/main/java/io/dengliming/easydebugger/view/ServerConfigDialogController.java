@@ -1,7 +1,7 @@
 package io.dengliming.easydebugger.view;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.netty.MsgType;
+import io.dengliming.easydebugger.constant.MsgType;
 import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.T;
 import javafx.fxml.FXML;
@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class TcpServerConfigDialogController implements Initializable {
+public class ServerConfigDialogController implements Initializable {
 
     private boolean isOkClicked;
 

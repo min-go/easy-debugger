@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.shape.Circle?>
-<Tab closable="false" text="TCP客户端" xmlns:fx="http://javafx.com/fxml/1">
+<Tab closable="false" text="UDP服务端" xmlns:fx="http://javafx.com/fxml/1">
     <content>
         <HBox>
             <BorderPane>
@@ -34,7 +34,7 @@
                     <VBox>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
-                            <Text fx:id="clientName" style="-fx-font-size: 16px;">--</Text>
+                            <Text fx:id="serverName" style="-fx-font-size: 16px;">--</Text>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
@@ -42,26 +42,41 @@
                             <TextField fx:id="hostField" promptText="地址" disable="true"></TextField>
                             <TextField fx:id="portField" promptText="端口" disable="true"></TextField>
                             <Button fx:id="editBtn" text="编辑"></Button>
-                            <Button fx:id="connectBtn" text="连接"></Button>
+                            <Button fx:id="listenBtn" text="开始监听"></Button>
                         </HBox>
                         <HBox alignment="CENTER_LEFT" spacing="10">
                             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>
-                            <Circle fx:id="statusCircle" radius="5.0" fill="darkgrey" stroke="#0000" />
-                            <Text fx:id="statusText" text="未连接"></Text>
+                            <Circle fx:id="listenStatusCircle" radius="5.0" fill="darkgrey" stroke="#0000" />
+                            <Text fx:id="listenStatusText" text="未在监听"></Text>
                             <Button fx:id="clearBtn" text="清空消息"></Button>
                         </HBox>
                     </VBox>
                 </top>
                 <center>
-                    <ScrollPane fx:id="msgContentPane" fitToWidth="true" fitToHeight="true">
-                        <ListView fx:id="msgContentList">
-                            <placeholder>
-                                <StackPane>
-                                    <Label text="暂无数据..." style="-fx-font-size: 12px; -fx-text-fill: gray;"></Label>
-                                </StackPane>
-                            </placeholder>
-                        </ListView>
-                    </ScrollPane>
+                    <HBox>
+                        <ScrollPane fx:id="msgContentPane" fitToWidth="true" fitToHeight="true" HBox.hgrow="ALWAYS">
+                            <content>
+                                <ListView fx:id="msgContentList">
+                                    <placeholder>
+                                        <StackPane>
+                                            <Label text="暂无数据..." style="-fx-font-size: 12px; -fx-text-fill: gray;"></Label>
+                                        </StackPane>
+                                    </placeholder>
+                                </ListView>
+                            </content>
+                        </ScrollPane>
+                        <ScrollPane fx:id="clientListPane" fitToHeight="true">
+                            <TableView fx:id="clientList" prefWidth="200" fixedCellSize="60">
+                                <columns>
+                                    <TableColumn fx:id="clientNameColumn" text="客户端" prefWidth="200">
+                                    </TableColumn>
+                                </columns>
+                                <placeholder>
+                                    <Label text="暂无连接客户端..." style="-fx-font-size: 12px; -fx-text-fill: gray;"></Label>
+                                </placeholder>
+                            </TableView>
+                        </ScrollPane>
+                    </HBox>
                 </center>
                 <bottom>
                     <HBox alignment="CENTER_LEFT" spacing="10">
@@ -69,6 +84,7 @@
                         <TextField fx:id="sendMsgField" promptText="请输入要发送的文本" prefWidth="400"></TextField>
                         <RadioButton fx:id="stringMsgOption" text="文本" selected="true" />
                         <RadioButton fx:id="hexMsgOption" text="16进制"  />
+                        <CheckBox fx:id="groupSendCheckBox" text="群发"></CheckBox>
                         <Button fx:id="sendMsgBtn" text="发送"></Button>
                     </HBox>
                 </bottom>

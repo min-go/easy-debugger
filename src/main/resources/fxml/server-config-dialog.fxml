@@ -5,7 +5,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import java.lang.String?>
-<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.TcpServerConfigDialogController">
+<DialogPane xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.ServerConfigDialogController">
     <content>
         <VBox spacing="10" alignment="CENTER_RIGHT">
             <padding><Insets top="10" right="10" bottom="10" left="10" /></padding>

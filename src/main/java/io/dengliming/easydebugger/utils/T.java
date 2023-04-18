@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -79,5 +80,23 @@ public final class T {
      */
     public static boolean hasLength(String str) {
         return (str != null && !str.isEmpty());
+    }
+
+    public static byte[] toHexBytes(String str) {
+        if (str == null || str.trim().equals("")) {
+            return new byte[0];
+        }
+        byte[] bytes = new byte[str.length() / 2];
+        for (int i = 0; i < str.length() / 2; i++) {
+            String subStr = str.substring(i * 2, i * 2 + 2);
+            bytes[i] = (byte) Integer.parseInt(subStr, 16);
+        }
+        return bytes;
+    }
+
+    public static String generateClientId(InetSocketAddress socketAddress) {
+        String clientIp = socketAddress.getAddress().getHostAddress();
+        int clientPort = socketAddress.getPort();
+        return String.format("%s:%d", clientIp, clientPort);
     }
 }

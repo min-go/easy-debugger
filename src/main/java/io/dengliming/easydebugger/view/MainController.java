@@ -22,6 +22,7 @@ public class MainController implements Initializable {
         addTab("tcp-client-view", new TcpClientController());
         addTab("tcp-server-view", new TcpServerController());
         addTab("udp-client-view", new UdpClientController());
+        addTab("udp-server-view", new UdpServerController());
     }
 
     private void addTab(String title, Object controller) {

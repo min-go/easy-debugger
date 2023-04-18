@@ -2,41 +2,37 @@ package io.dengliming.easydebugger.netty.server;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.ConnectProperties;
+import io.dengliming.easydebugger.netty.codec.UdpMsgDecoder;
 import io.dengliming.easydebugger.netty.codec.MsgEncoder;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
 import io.netty.bootstrap.AbstractBootstrap;
-import io.netty.bootstrap.ServerBootstrap;
+import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
+import io.netty.channel.epoll.EpollChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.SocketChannel;
-import io.netty.channel.socket.nio.NioServerSocketChannel;
-import io.netty.handler.codec.string.StringDecoder;
-import io.netty.handler.logging.LogLevel;
-import io.netty.handler.logging.LoggingHandler;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import lombok.extern.slf4j.Slf4j;
 
 import static io.dengliming.easydebugger.constant.CommonConstant.*;
 
 @Slf4j
-public class TcpDebuggerServer extends AbstractDebuggerServer {
+public class UdpDebuggerServer extends AbstractDebuggerServer {
 
-    private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    public TcpDebuggerServer(ConnectConfig config, IGenericEventListener eventListener) {
+    public UdpDebuggerServer(ConnectConfig config, IGenericEventListener eventListener) {
         super(new ConnectProperties(config.getHost(), config.getPort(), config.getUid()), eventListener);
     }
 
     @Override
     protected AbstractBootstrap initBootstrap() {
-        bossGroup = new NioEventLoopGroup();
         workerGroup = new NioEventLoopGroup();
-        ServerBootstrap bootstrap = new ServerBootstrap()
-                .group(bossGroup, workerGroup)
-                .channel(NioServerSocketChannel.class)
-                .childHandler(new ChannelInitializer<SocketChannel>() {
+        Bootstrap bootstrap = new Bootstrap()
+                .group(workerGroup)
+                .channel(NioDatagramChannel.class)
+                .handler(new ChannelInitializer<NioDatagramChannel>() {
                     @Override
-                    public void initChannel(SocketChannel ch) throws Exception {
+                    protected void initChannel(NioDatagramChannel ch) throws Exception {
                         ChannelPipeline p = ch.pipeline();
 
                         // 设置编码器
@@ -46,17 +42,20 @@ public class TcpDebuggerServer extends AbstractDebuggerServer {
                         p.addFirst(SERVER_DECODER_HANDLER, createProtocolDecoder());
 
                         // 业务处理器新增到最后
-                        p.addLast(SERVER_SERVICE_HANDLER, new ServerChannelHandler(getConfig(), getEventListener()));
+                        p.addLast(SERVER_SERVICE_HANDLER, new UdpServerChannelHandler(getConfig(), getEventListener()));
+
                     }
                 });
+
         doInitOptions(bootstrap);
         return bootstrap;
     }
 
     protected void doInitOptions(AbstractBootstrap bootstrap) {
-        bootstrap.handler(new LoggingHandler(LogLevel.INFO));
-        ((ServerBootstrap) bootstrap).option(ChannelOption.SO_BACKLOG, 1024)
-                .childOption(ChannelOption.SO_KEEPALIVE, true);
+        bootstrap.option(ChannelOption.SO_RCVBUF, 1024 * 1024)
+                .option(ChannelOption.SO_SNDBUF, 1024 * 1024)
+                .option(EpollChannelOption.SO_REUSEPORT, true)
+                .option(ChannelOption.SO_BROADCAST, true);
     }
 
     @Override
@@ -66,15 +65,11 @@ public class TcpDebuggerServer extends AbstractDebuggerServer {
 
     @Override
     protected ChannelInboundHandlerAdapter createProtocolDecoder() {
-        return new StringDecoder();
+        return new UdpMsgDecoder();
     }
 
     @Override
     public void destroy() {
-        if (bossGroup != null) {
-            bossGroup.shutdownGracefully();
-        }
-
         if (workerGroup != null) {
             workerGroup.shutdownGracefully();
         }

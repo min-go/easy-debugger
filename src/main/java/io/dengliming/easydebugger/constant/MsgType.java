@@ -1,8 +1,11 @@
-package io.dengliming.easydebugger.netty;
+package io.dengliming.easydebugger.constant;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * 消息类型
+ */
 public enum MsgType {
     /**
      * 字符串

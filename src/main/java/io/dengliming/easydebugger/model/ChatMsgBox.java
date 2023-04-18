@@ -15,7 +15,9 @@ import javafx.scene.text.Text;
 
 import java.time.LocalDateTime;
 
-
+/**
+ * 服务端与客户端通信的聊天框
+ */
 public class ChatMsgBox {
 
     private static final Font CONTENT_FONT = new Font(13);

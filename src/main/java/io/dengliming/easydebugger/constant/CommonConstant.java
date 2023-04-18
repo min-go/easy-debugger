@@ -2,6 +2,9 @@ package io.dengliming.easydebugger.constant;
 
 import javafx.scene.paint.Paint;
 
+/**
+ * 公用常量
+ */
 public interface CommonConstant {
     String DIS_CONNECT_TEXT = "断开连接";
     String CONNECT_TEXT = "连接";

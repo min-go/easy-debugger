@@ -1,9 +1,10 @@
 package io.dengliming.easydebugger.utils;
 
-import io.dengliming.easydebugger.model.ClientDebugger;
 import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.model.ServerDebugger;
+import io.dengliming.easydebugger.netty.DebuggerFactory;
+import io.dengliming.easydebugger.netty.client.SocketDebuggerClient;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
+import io.dengliming.easydebugger.netty.server.IServer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -19,59 +20,43 @@ public enum SocketDebuggerCache {
     /**
      * 用于缓存netty客户端
      */
-    private final Map<String, ClientDebugger> CLIENT_CACHE = new ConcurrentHashMap<>();
+    private final Map<String, SocketDebuggerClient> CLIENT_CACHE = new ConcurrentHashMap<>();
     /**
      * 用于缓存netty服务端debugger数据
      */
-    private final Map<String, ServerDebugger> SERVER_CACHE = new ConcurrentHashMap<>();
+    private final Map<String, IServer> SERVER_CACHE = new ConcurrentHashMap<>();
 
-    public ServerDebugger getOrCreateServer(ConnectConfig config, IGenericEventListener eventListener) {
-        ServerDebugger serverDebugger = SERVER_CACHE.get(config.getUid());
-        if (serverDebugger != null) {
-            return serverDebugger;
-        }
-        synchronized (SERVER_CACHE) {
-            serverDebugger = SERVER_CACHE.get(config.getUid());
-            if (serverDebugger != null) {
-                return serverDebugger;
-            }
-
-            serverDebugger = new ServerDebugger(config, eventListener);
-            SERVER_CACHE.put(config.getUid(), serverDebugger);
-        }
-        return serverDebugger;
+    public IServer getOrCreateServer(ConnectConfig config, IGenericEventListener eventListener) {
+        return SERVER_CACHE.computeIfAbsent(config.getUid(), k -> DebuggerFactory.createServerDebugger(config, eventListener));
     }
 
-    public ClientDebugger getOrCreateClient(ConnectConfig config, IGenericEventListener clientEventListener) {
-        ClientDebugger client = CLIENT_CACHE.get(config.getUid());
-        if (client != null) {
-            return client;
-        }
-        synchronized (CLIENT_CACHE) {
-            client = CLIENT_CACHE.get(config.getUid());
-            if (client != null) {
-                return client;
-            }
-
-            client = new ClientDebugger(config, clientEventListener);
-            CLIENT_CACHE.put(config.getUid(), client);
+    public SocketDebuggerClient getOrCreateClient(ConnectConfig config, IGenericEventListener clientEventListener) {
+        return CLIENT_CACHE.computeIfAbsent(config.getUid(), k -> {
+            SocketDebuggerClient client = DebuggerFactory.createClientDebugger(config, clientEventListener);
             client.init();
-        }
-        return client;
+            return client;
+        });
     }
 
-    public ServerDebugger getServerDebugger(String serverId) {
+    public IServer getServerDebugger(String serverId) {
         return SERVER_CACHE.get(serverId);
     }
 
-    public ClientDebugger getClientDebugger(String clientId) {
+    public SocketDebuggerClient getClientDebugger(String clientId) {
         return CLIENT_CACHE.get(clientId);
     }
 
     public void removeClientCache(String clientId) {
-        ClientDebugger clientDebugger = CLIENT_CACHE.remove(clientId);
+        SocketDebuggerClient clientDebugger = CLIENT_CACHE.remove(clientId);
         if (clientDebugger != null) {
             clientDebugger.destroy();
+        }
+    }
+
+    public void removeServerCache(String serverId) {
+        IServer server = SERVER_CACHE.remove(serverId);
+        if (server != null) {
+            server.destroy();
         }
     }
 }

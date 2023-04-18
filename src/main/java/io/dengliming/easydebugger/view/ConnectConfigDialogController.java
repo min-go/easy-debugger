@@ -1,12 +1,11 @@
 package io.dengliming.easydebugger.view;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.netty.MsgType;
+import io.dengliming.easydebugger.constant.MsgType;
 import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.T;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;

@@ -12,6 +12,4 @@ public interface IMessage {
      * @return
      */
     byte[] getMessage();
-
-    MsgType msgType();
 }

@@ -6,10 +6,23 @@ import javafx.scene.control.ListCell;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 
+/**
+ * 表示ListView中的单行（连接配置）
+ */
 public class ConnectConfigCell extends ListCell<ConnectConfig> {
 
+    private final Label titleLabel;
+    private final Label subTitleLabel;
+    private final VBox vBox;
+
     public ConnectConfigCell() {
-        super();
+        titleLabel = new Label();
+        titleLabel.setFont(new Font(16));
+        titleLabel.setWrapText(true);
+        subTitleLabel = new Label();
+        subTitleLabel.setFont(new Font(10));
+        vBox = new VBox(titleLabel, subTitleLabel);
+        vBox.setSpacing(5);
     }
 
     @Override
@@ -20,15 +33,8 @@ public class ConnectConfigCell extends ListCell<ConnectConfig> {
             setText(null);
             setGraphic(null);
         } else {
-            Label titleLabel = new Label();
             titleLabel.setText(item.getName());
-            titleLabel.setFont(new Font(16));
-            titleLabel.setWrapText(true);
-            Label subTitleLabel = new Label();
             subTitleLabel.setText(item.getHost() + ":" + item.getPort());
-            subTitleLabel.setFont(new Font(10));
-            VBox vBox = new VBox(titleLabel, subTitleLabel);
-            vBox.setSpacing(5);
             setGraphic(vBox);
         }
     }

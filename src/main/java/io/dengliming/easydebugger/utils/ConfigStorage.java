@@ -14,6 +14,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 连接配置统一存储
+ */
 @Slf4j
 public enum ConfigStorage {
     INSTANCE;

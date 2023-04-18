@@ -2,8 +2,8 @@ package io.dengliming.easydebugger.view;
 
 import io.dengliming.easydebugger.constant.CommonConstant;
 import io.dengliming.easydebugger.constant.ConnectType;
-import io.dengliming.easydebugger.model.ClientDebugger;
 import io.dengliming.easydebugger.model.ConnectConfig;
+import io.dengliming.easydebugger.netty.client.SocketDebuggerClient;
 import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.SocketDebuggerCache;
 import io.netty.channel.ChannelFuture;
@@ -44,7 +44,7 @@ public class TcpClientController extends AbstractClientController {
             }
 
             try {
-                ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedConfig, this);
+                SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedConfig, this);
 
                 if (connectBtn.getText().equals(DIS_CONNECT_TEXT)) {
                     clientDebugger.disconnect();

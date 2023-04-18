@@ -3,10 +3,9 @@ package io.dengliming.easydebugger.view;
 import io.dengliming.easydebugger.constant.CommonConstant;
 import io.dengliming.easydebugger.constant.ConnectType;
 import io.dengliming.easydebugger.model.ChatMsgBox;
-import io.dengliming.easydebugger.model.ClientDebugger;
 import io.dengliming.easydebugger.model.ConnectConfig;
-import io.dengliming.easydebugger.netty.MsgType;
-import io.dengliming.easydebugger.netty.client.TcpDebuggerClient;
+import io.dengliming.easydebugger.constant.MsgType;
+import io.dengliming.easydebugger.netty.client.SocketDebuggerClient;
 import io.dengliming.easydebugger.netty.event.*;
 import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.ConfigStorage;
@@ -107,8 +106,9 @@ public abstract class AbstractClientController implements IGenericEventListener<
             }
 
             try {
-                ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedItem, this);
-                ((TcpDebuggerClient) (clientDebugger.getClient())).sendMsg(hexMsgOption.isSelected() ? MsgType.HEX : MsgType.STRING, message);
+                SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedItem, this);
+                clientDebugger.connect(null, 3000);
+                clientDebugger.sendMsg(hexMsgOption.isSelected() ? MsgType.HEX : MsgType.STRING, message);
             } catch (Exception e) {
                 log.error("connect error.", e);
             }
@@ -166,9 +166,9 @@ public abstract class AbstractClientController implements IGenericEventListener<
                 portField.setText(String.valueOf(selectedItem.getPort()));
 
                 // 重新编辑之后重置连接
-                ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(selectedItem.getUid());
+                SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(selectedItem.getUid());
                 if (clientDebugger != null) {
-                    clientDebugger.disconnectClient();
+                    clientDebugger.disconnect();
                 }
                 setClientStatus(false);
 
@@ -203,11 +203,11 @@ public abstract class AbstractClientController implements IGenericEventListener<
     public void onEvent(ChannelEvent event) {
         Platform.runLater(() -> {
             String clientId = event.getSource().toString();
-            ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(clientId);
+            SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(clientId);
             if (event instanceof ClientReadMessageEvent) {
                 ClientReadMessageEvent msgEvent = (ClientReadMessageEvent) event;
                 if (clientDebugger != null) {
-                    clientDebugger.addLeftMsg(msgEvent.getMsg().toString());
+                    clientDebugger.getChatMsgBox().addLeftMsg(msgEvent.getMsg().toString());
                 }
                 return;
             }

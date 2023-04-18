@@ -3,6 +3,9 @@ package io.dengliming.easydebugger.model;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * 客户端会话管理器
+ */
 public enum SessionHolder {
     INSTANCE;
 

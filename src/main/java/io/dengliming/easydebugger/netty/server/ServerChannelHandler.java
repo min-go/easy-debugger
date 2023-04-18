@@ -2,10 +2,9 @@ package io.dengliming.easydebugger.netty.server;
 
 import io.dengliming.easydebugger.model.ClientSession;
 import io.dengliming.easydebugger.model.SessionHolder;
-import io.dengliming.easydebugger.netty.event.ClientInactiveEvent;
-import io.dengliming.easydebugger.netty.event.ClientOnlineEvent;
-import io.dengliming.easydebugger.netty.event.ClientReadMessageEvent;
-import io.dengliming.easydebugger.netty.event.ExceptionEvent;
+import io.dengliming.easydebugger.netty.ConnectProperties;
+import io.dengliming.easydebugger.netty.event.*;
+import io.dengliming.easydebugger.utils.T;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -14,39 +13,42 @@ import java.net.InetSocketAddress;
 
 public class ServerChannelHandler extends SimpleChannelInboundHandler {
 
-    private final AbstractSocketServer server;
+    private final ConnectProperties config;
+    private final IGenericEventListener eventListener;
 
-    public ServerChannelHandler(AbstractSocketServer server) {
-        this.server = server;
+    public ServerChannelHandler(ConnectProperties config, IGenericEventListener eventListener) {
+        this.config = config;
+        this.eventListener = eventListener;
     }
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, Object msg) {
-        ClientReadMessageEvent event = new ClientReadMessageEvent(buildClientId(ctx.channel()), msg);
-        event.setServerId(server.getConfig().getConnectKey());
-        server.getEventListener().onEvent(event);
+        ClientReadMessageEvent event = new ClientReadMessageEvent(T.generateClientId((InetSocketAddress) ctx.channel().remoteAddress()), msg);
+        event.setServerId(config.getConnectKey());
+        eventListener.onEvent(event);
         ctx.fireChannelRead(msg);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         Channel channel = ctx.channel();
-        ClientSession session = new ClientSession(buildClientId(channel), channel);
+        String clientId = T.generateClientId((InetSocketAddress) channel.remoteAddress());
+        ClientSession session = new ClientSession(clientId, channel);
         SessionHolder.INSTANCE.put(session.getId(), session);
-        ClientOnlineEvent clientOnlineEvent = new ClientOnlineEvent(buildClientId(ctx.channel()));
-        clientOnlineEvent.setServerId(server.getConfig().getConnectKey());
-        server.getEventListener().onEvent(clientOnlineEvent);
+        ClientOnlineEvent clientOnlineEvent = new ClientOnlineEvent(clientId);
+        clientOnlineEvent.setServerId(config.getConnectKey());
+        eventListener.onEvent(clientOnlineEvent);
         super.channelActive(ctx);
     }
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         try {
-            String clientId = buildClientId(ctx.channel());
+            String clientId = T.generateClientId((InetSocketAddress) ctx.channel().remoteAddress());
             SessionHolder.INSTANCE.remove(clientId);
-            ClientInactiveEvent clientInactiveEvent = new ClientInactiveEvent(buildClientId(ctx.channel()));
-            clientInactiveEvent.setServerId(server.getConfig().getConnectKey());
-            server.getEventListener().onEvent(clientInactiveEvent);
+            ClientInactiveEvent clientInactiveEvent = new ClientInactiveEvent(clientId);
+            clientInactiveEvent.setServerId(config.getConnectKey());
+            eventListener.onEvent(clientInactiveEvent);
         } finally {
             super.channelInactive(ctx);
         }
@@ -55,16 +57,9 @@ public class ServerChannelHandler extends SimpleChannelInboundHandler {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
         try {
-            server.getEventListener().onEvent(new ExceptionEvent(buildClientId(ctx.channel()), cause));
+            eventListener.onEvent(new ExceptionEvent(T.generateClientId((InetSocketAddress) ctx.channel().remoteAddress()), cause));
         } finally {
             super.exceptionCaught(ctx, cause);
         }
-    }
-
-    private String buildClientId(Channel channel) {
-        InetSocketAddress socketAddress = (InetSocketAddress) channel.remoteAddress();
-        String clientIp = socketAddress.getAddress().getHostAddress();
-        int clientPort = socketAddress.getPort();
-        return String.format("%s:%d", clientIp, clientPort);
     }
 }

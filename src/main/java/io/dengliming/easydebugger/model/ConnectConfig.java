@@ -1,15 +1,30 @@
 package io.dengliming.easydebugger.model;
 
 import io.dengliming.easydebugger.constant.ConnectType;
-import io.dengliming.easydebugger.netty.MsgType;
+import io.dengliming.easydebugger.constant.MsgType;
 
 import java.util.UUID;
 
+/**
+ * 连接配置
+ */
 public class ConnectConfig {
 
+    /**
+     * 配置的唯一标识
+     */
     private String uid;
+    /**
+     * 主机
+     */
     private String host;
+    /**
+     * 端口
+     */
     private int port;
+    /**
+     * 名称或备注
+     */
     private String name;
     /**
      * 是否重复发送（客户端使用）
@@ -20,7 +35,9 @@ public class ConnectConfig {
      */
     private boolean autoReply;
 
-    // 连接类型
+    /**
+     * 连接类型
+     */
     private ConnectType connectType = ConnectType.TCP_CLIENT;
 
     /**

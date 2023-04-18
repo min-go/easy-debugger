@@ -6,19 +6,26 @@ import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.layout.HBox;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 
 /**
- * 连接客户端（无状态的），UDP服务端
+ * 连接客户端（需要显示状态的）
  */
-public class ClientCell extends TableCell<ClientItem, ClientItem> {
+public class StatefulClientCell extends TableCell<ClientItem, ClientItem> {
 
     private final Label label;
+    private final Circle circle;
     private final HBox hBox;
 
-    public ClientCell() {
+    public StatefulClientCell() {
         label = new Label();
         label.setWrapText(true);
+        circle = new Circle(5);
+        circle.setFill(Paint.valueOf("darkgrey"));
+        circle.setStroke(Paint.valueOf("#0000"));
         hBox = new HBox();
+        hBox.getChildren().add(circle);
         hBox.setAlignment(Pos.CENTER_LEFT);
         hBox.getChildren().add(label);
         hBox.setSpacing(5);
@@ -33,6 +40,11 @@ public class ClientCell extends TableCell<ClientItem, ClientItem> {
             setGraphic(null);
         } else {
             label.setText(item.getClientName());
+            if (item.isConnected()) {
+                circle.setFill(Paint.valueOf("green"));
+            } else {
+                circle.setFill(Paint.valueOf("darkgrey"));
+            }
             setGraphic(hBox);
         }
     }

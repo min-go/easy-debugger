@@ -1,11 +1,11 @@
 package io.dengliming.easydebugger.netty.client;
 
-import io.dengliming.easydebugger.model.ClientDebugger;
+import io.dengliming.easydebugger.constant.MsgType;
+import io.dengliming.easydebugger.model.ChatMsgBox;
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.*;
 import io.dengliming.easydebugger.netty.codec.MsgEncoder;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
-import io.dengliming.easydebugger.utils.SocketDebuggerCache;
 import io.dengliming.easydebugger.utils.T;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInboundHandler;
@@ -20,12 +20,14 @@ import java.util.concurrent.TimeUnit;
 public abstract class SocketDebuggerClient extends AbstractSocketClient {
 
     private final ConnectConfig connectConfig;
+    private final ChatMsgBox chatMsgBox;
     private ScheduledFuture scheduledFuture;
-    private volatile boolean stopScheduled;
+    private volatile boolean stopScheduled = true;
 
     public SocketDebuggerClient(ConnectConfig config, IGenericEventListener clientEventListener) {
         super(new ConnectProperties(config.getHost(), config.getPort(), config.getUid()), clientEventListener);
         this.connectConfig = config;
+        this.chatMsgBox = new ChatMsgBox();
 
         // 是否配置重复发送
         if (config.isRepeatSend() && config.getSendInterval() > 0 && T.hasLength(config.getSendMsg())) {
@@ -52,17 +54,14 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
 
     public void sendMsg(MsgType msgType, String message) {
         try {
-            IMessage msg = MessageFactory.createMessage(msgType, message);
-            ChannelFuture future = this.writeAndFlush(msg);
+            //IMessage msg = MessageFactory.createMessage(msgType, message);
+            ChannelFuture future = this.writeAndFlush(doBuildMessage(msgType, message));
             if (future != null) {
                 future.addListener(f -> {
                     if (!f.isSuccess()) {
                         return;
                     }
-                    ClientDebugger clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(connectConfig.getUid());
-                    if (clientDebugger != null) {
-                        clientDebugger.getChatMsgBox().addRightMsg(message);
-                    }
+                    SocketDebuggerClient.this.getChatMsgBox().addRightMsg(message);
                 });
             }
         } catch (Exception e) {
@@ -73,10 +72,10 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
     @Override
     public void destroy() {
         super.destroy();
-
         if (scheduledFuture != null) {
             scheduledFuture.cancel(false);
         }
+        chatMsgBox.clear();
     }
 
     public void setStopScheduled(boolean val) {
@@ -90,5 +89,23 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
                 setStopScheduled(true);
             }
         });
+    }
+
+    public void online() {
+        chatMsgBox.setOnline(true);
+        setStopScheduled(false);
+    }
+
+    public void offline() {
+        chatMsgBox.setOnline(false);
+        setStopScheduled(true);
+    }
+
+    public ChatMsgBox getChatMsgBox() {
+        return chatMsgBox;
+    }
+
+    protected SocketMessage doBuildMessage(MsgType msgType, String message) {
+        return MessageFactory.createSocketMessage(msgType, message);
     }
 }
