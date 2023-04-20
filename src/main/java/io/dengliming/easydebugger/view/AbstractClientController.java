@@ -132,6 +132,7 @@ public abstract class AbstractClientController implements IGenericEventListener<
             connectConfigListView.getItems().removeAll(selectedItems);
             ConfigStorage.INSTANCE.removeAll(clientList);
             clientList.forEach(SocketDebuggerCache.INSTANCE::removeClientCache);
+            clientList.forEach(SocketDebuggerCache.INSTANCE::removeClientDebuggerView);
         });
     }
 
@@ -166,10 +167,7 @@ public abstract class AbstractClientController implements IGenericEventListener<
                 portField.setText(String.valueOf(selectedItem.getPort()));
 
                 // 重新编辑之后重置连接
-                SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getClientDebugger(selectedItem.getUid());
-                if (clientDebugger != null) {
-                    clientDebugger.disconnect();
-                }
+                SocketDebuggerCache.INSTANCE.removeClientCache(selectedItem.getUid());
                 setClientStatus(false);
 
                 ConfigStorage.INSTANCE.set(selectedItem);
@@ -265,7 +263,7 @@ public abstract class AbstractClientController implements IGenericEventListener<
             setClientStatus(chatMsgBox.isOnline());
         });
         connectConfigListView.getItems().addAll(ConfigStorage.INSTANCE.getConnectConfigs(connectType()));
-        connectConfigListView.getSelectionModel().select(0);
+        //connectConfigListView.getSelectionModel().select(0);
         connectConfigListView.setStyle(CommonConstant.SELECTION_STYLE);
     }
 

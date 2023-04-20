@@ -5,7 +5,6 @@ import io.dengliming.easydebugger.constant.ConnectType;
 import io.dengliming.easydebugger.constant.MsgType;
 import io.dengliming.easydebugger.model.*;
 import io.dengliming.easydebugger.netty.MessageFactory;
-import io.dengliming.easydebugger.netty.SocketMessage;
 import io.dengliming.easydebugger.netty.event.*;
 import io.dengliming.easydebugger.netty.server.AbstractDebuggerServer;
 import io.dengliming.easydebugger.utils.Alerts;
@@ -114,7 +113,7 @@ public abstract class AbstractServerController implements IGenericEventListener<
             serverName.setText(((ConnectConfig) newValue).getName());
 
             //
-            AbstractDebuggerServer serverDebugger = (AbstractDebuggerServer) SocketDebuggerCache.INSTANCE.getOrCreateServer((ConnectConfig) newValue, this);
+            AbstractDebuggerServer serverDebugger = SocketDebuggerCache.INSTANCE.getOrCreateServer((ConnectConfig) newValue, this);
             clientList.setItems(serverDebugger.getServerDebuggerView().getClientList());
             msgContentPane.setContent(null);
             setListenStatus(serverDebugger.getServerDebuggerView().isListenStatus());
@@ -130,7 +129,7 @@ public abstract class AbstractServerController implements IGenericEventListener<
             clientList.refresh();
         });
         connectConfigListView.getItems().addAll(ConfigStorage.INSTANCE.getConnectConfigs(connectType()));
-        connectConfigListView.getSelectionModel().select(0);
+        //connectConfigListView.getSelectionModel().select(0);
         connectConfigListView.setStyle(CommonConstant.SELECTION_STYLE);
     }
 
@@ -408,7 +407,7 @@ public abstract class AbstractServerController implements IGenericEventListener<
 
     protected abstract ConnectType connectType();
 
-    protected SocketMessage buildSocketMessage(ClientSession session, MsgType msgType, String sendMsg) {
+    protected Object buildSocketMessage(ClientSession session, MsgType msgType, String sendMsg) {
         return MessageFactory.createSocketMessage(msgType, sendMsg);
     }
 

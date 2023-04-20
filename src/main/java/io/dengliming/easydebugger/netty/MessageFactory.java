@@ -16,6 +16,10 @@ public class MessageFactory {
         return new UdpMessage(buildMessage(type, msg));
     }
 
+    public static WebSocketMessage createWebSocketMessage(MsgType type, String msg) {
+        return new WebSocketMessage(buildMessage(type, msg));
+    }
+
     private static byte[] buildMessage(MsgType type, String msg) {
         byte[] message;
         if (Objects.requireNonNull(type) == MsgType.HEX) {

@@ -2,8 +2,10 @@ package io.dengliming.easydebugger.utils;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.DebuggerFactory;
+import io.dengliming.easydebugger.netty.client.ClientDebuggerView;
 import io.dengliming.easydebugger.netty.client.SocketDebuggerClient;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
+import io.dengliming.easydebugger.netty.server.AbstractDebuggerServer;
 import io.dengliming.easydebugger.netty.server.IServer;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,9 +26,11 @@ public enum SocketDebuggerCache {
     /**
      * 用于缓存netty服务端debugger数据
      */
-    private final Map<String, IServer> SERVER_CACHE = new ConcurrentHashMap<>();
+    private final Map<String, AbstractDebuggerServer> SERVER_CACHE = new ConcurrentHashMap<>();
 
-    public IServer getOrCreateServer(ConnectConfig config, IGenericEventListener eventListener) {
+    private final Map<String, ClientDebuggerView> CLIENT_DEBUGGER_VIEW_CACHE = new ConcurrentHashMap<>();
+
+    public AbstractDebuggerServer getOrCreateServer(ConnectConfig config, IGenericEventListener eventListener) {
         return SERVER_CACHE.computeIfAbsent(config.getUid(), k -> DebuggerFactory.createServerDebugger(config, eventListener));
     }
 
@@ -36,6 +40,14 @@ public enum SocketDebuggerCache {
             client.init();
             return client;
         });
+    }
+
+    public ClientDebuggerView getOrCreateClientDebuggerView(String clientId) {
+        return CLIENT_DEBUGGER_VIEW_CACHE.computeIfAbsent(clientId, k -> new ClientDebuggerView());
+    }
+
+    public ClientDebuggerView removeClientDebuggerView(String clientId) {
+        return CLIENT_DEBUGGER_VIEW_CACHE.remove(clientId);
     }
 
     public IServer getServerDebugger(String serverId) {

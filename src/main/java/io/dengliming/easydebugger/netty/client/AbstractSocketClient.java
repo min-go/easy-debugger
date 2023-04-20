@@ -21,7 +21,7 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
 
     private final ConnectProperties config;
     private final IGenericEventListener clientEventListener;
-    private Channel channel;
+    protected Channel channel;
     private Bootstrap bootstrap;
     private EventLoopGroup workerGroup;
 
@@ -31,22 +31,20 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
     }
 
     public void init() {
-        this.init(new NioEventLoopGroup());
+        this.workerGroup = new NioEventLoopGroup();
+        this.bootstrap = createBootstrap((NioEventLoopGroup) workerGroup);
+        this.doInitOptions(this.bootstrap);
     }
 
-    public void init(NioEventLoopGroup clientGroup) {
-        this.bootstrap = new Bootstrap()
+    protected Bootstrap createBootstrap(NioEventLoopGroup clientGroup) {
+        return new Bootstrap()
                 .group(clientGroup)
                 .channel(channel())
                 .handler(new ChannelInitializer<Channel>() {
                     @Override
                     protected void initChannel(Channel channel) {
                         // 关掉原有的链接
-                        if (AbstractSocketClient.this.channel != null) {
-                            AbstractSocketClient.this.channel.close();
-                        }
-
-                        AbstractSocketClient.this.channel = channel;
+                        setChannel(channel);
                         ChannelPipeline pipeline = channel.pipeline();
 
                         // 设置客户端编解码器
@@ -61,8 +59,6 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
 
                     }
                 });
-        this.doInitOptions(this.bootstrap);
-        this.workerGroup = clientGroup;
     }
 
     @Override
@@ -231,6 +227,15 @@ public abstract class AbstractSocketClient implements IClient<NioEventLoopGroup>
             channel.close();
         }
         workerGroup.shutdownGracefully();
+    }
+
+    protected void setChannel(Channel channel) {
+        // 关掉原有的链接
+        if (this.channel != null) {
+            this.channel.close();
+        }
+
+        this.channel = channel;
     }
 }
 

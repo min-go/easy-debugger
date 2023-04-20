@@ -44,11 +44,10 @@ public class TcpClientController extends AbstractClientController {
             }
 
             try {
-                SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedConfig, this);
-
                 if (connectBtn.getText().equals(DIS_CONNECT_TEXT)) {
-                    clientDebugger.disconnect();
+                    SocketDebuggerCache.INSTANCE.removeClientCache(selectedConfig.getUid());
                 } else {
+                    SocketDebuggerClient clientDebugger = SocketDebuggerCache.INSTANCE.getOrCreateClient(selectedConfig, this);
                     clientDebugger.connect(it -> {
                         ChannelFuture future = (ChannelFuture) it;
                         if (!future.isSuccess()) {
@@ -59,6 +58,7 @@ public class TcpClientController extends AbstractClientController {
                 }
             } catch (Exception e) {
                 log.error("连接异常", e);
+                Platform.runLater(() -> Alerts.showError("连接异常！", e));
             }
         });
     }

@@ -6,6 +6,7 @@ import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.*;
 import io.dengliming.easydebugger.netty.codec.MsgEncoder;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
+import io.dengliming.easydebugger.utils.SocketDebuggerCache;
 import io.dengliming.easydebugger.utils.T;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInboundHandler;
@@ -20,26 +21,13 @@ import java.util.concurrent.TimeUnit;
 public abstract class SocketDebuggerClient extends AbstractSocketClient {
 
     private final ConnectConfig connectConfig;
-    private final ChatMsgBox chatMsgBox;
     private ScheduledFuture scheduledFuture;
-    private volatile boolean stopScheduled = true;
 
     public SocketDebuggerClient(ConnectConfig config, IGenericEventListener clientEventListener) {
         super(new ConnectProperties(config.getHost(), config.getPort(), config.getUid()), clientEventListener);
         this.connectConfig = config;
-        this.chatMsgBox = new ChatMsgBox();
-
         // 是否配置重复发送
-        if (config.isRepeatSend() && config.getSendInterval() > 0 && T.hasLength(config.getSendMsg())) {
-            this.scheduledFuture = ThreadManager.INSTANCE.getScheduledThreadPoolExecutor()
-                    .scheduleWithFixedDelay(() -> {
-                                if (stopScheduled) {
-                                    return;
-                                }
-                                sendMsg(config.getSendMsgType(), config.getSendMsg());
-                            },
-                            config.getSendInterval(), config.getSendInterval(), TimeUnit.SECONDS);
-        }
+        enableRepeatSendSchedule();
     }
 
     @Override
@@ -54,11 +42,11 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
 
     public void sendMsg(MsgType msgType, String message) {
         try {
-            //IMessage msg = MessageFactory.createMessage(msgType, message);
             ChannelFuture future = this.writeAndFlush(doBuildMessage(msgType, message));
             if (future != null) {
                 future.addListener(f -> {
                     if (!f.isSuccess()) {
+                        log.error("sendMsg error.", future.cause());
                         return;
                     }
                     SocketDebuggerClient.this.getChatMsgBox().addRightMsg(message);
@@ -72,40 +60,60 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
     @Override
     public void destroy() {
         super.destroy();
-        if (scheduledFuture != null) {
-            scheduledFuture.cancel(false);
-        }
-        chatMsgBox.clear();
+        disableRepeatSendSchedule();
     }
 
-    public void setStopScheduled(boolean val) {
-        this.stopScheduled = val;
+    public void enableRepeatSendSchedule() {
+        disableRepeatSendSchedule();
+        // 是否配置重复发送
+        if (connectConfig.isRepeatSend() && connectConfig.getSendInterval() > 0 && T.hasLength(connectConfig.getSendMsg())) {
+            this.scheduledFuture = ThreadManager.INSTANCE.getScheduledThreadPoolExecutor()
+                    .scheduleWithFixedDelay(() -> sendMsg(connectConfig.getSendMsgType(), connectConfig.getSendMsg()),
+                            connectConfig.getSendInterval(), connectConfig.getSendInterval(), TimeUnit.SECONDS);
+            log.info("enableRepeatSendSchedule({}) done.", connectConfig.getName());
+        }
+    }
+
+    public void disableRepeatSendSchedule() {
+        try {
+            if (scheduledFuture != null) {
+                scheduledFuture.cancel(true);
+                scheduledFuture = null;
+                log.info("disableRepeatSendSchedule({}) done.", connectConfig.getName());
+            }
+        } catch (Exception e) {
+            log.error("disableRepeatSendSchedule({}) error", connectConfig.getName(), e);
+        }
     }
 
     @Override
     public ChannelFuture disconnect() {
-        return super.disconnect().addListener(future -> {
+        ChannelFuture channelFuture = super.disconnect();
+        return channelFuture == null ? null : channelFuture.addListener(future -> {
             if (future.isSuccess()) {
-                setStopScheduled(true);
+                disableRepeatSendSchedule();
             }
         });
     }
 
     public void online() {
-        chatMsgBox.setOnline(true);
-        setStopScheduled(false);
+        getChatMsgBox().setOnline(true);
+        enableRepeatSendSchedule();
     }
 
     public void offline() {
-        chatMsgBox.setOnline(false);
-        setStopScheduled(true);
+        getChatMsgBox().setOnline(false);
+        disableRepeatSendSchedule();
     }
 
     public ChatMsgBox getChatMsgBox() {
-        return chatMsgBox;
+        return SocketDebuggerCache
+                .INSTANCE
+                .getOrCreateClientDebuggerView(connectConfig.getUid())
+                .getChatMsgBox();
     }
 
-    protected SocketMessage doBuildMessage(MsgType msgType, String message) {
+    protected Object doBuildMessage(MsgType msgType, String message) {
         return MessageFactory.createSocketMessage(msgType, message);
     }
 }

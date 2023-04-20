@@ -9,7 +9,7 @@ public interface IClient<T> {
 
     String getHost();
 
-    void init(T arg);
+    void init();
 
     /**
      * 连接远程服务器

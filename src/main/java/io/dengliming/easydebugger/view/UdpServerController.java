@@ -6,7 +6,6 @@ import io.dengliming.easydebugger.model.ClientItem;
 import io.dengliming.easydebugger.model.ClientSession;
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.MessageFactory;
-import io.dengliming.easydebugger.netty.SocketMessage;
 import io.dengliming.easydebugger.netty.UdpMessage;
 import io.dengliming.easydebugger.netty.event.ChannelEvent;
 import io.dengliming.easydebugger.netty.event.ClientReadMessageEvent;
@@ -75,7 +74,7 @@ public class UdpServerController extends AbstractServerController {
     }
 
     @Override
-    protected SocketMessage buildSocketMessage(ClientSession session, MsgType msgType, String sendMsg) {
+    protected Object buildSocketMessage(ClientSession session, MsgType msgType, String sendMsg) {
         return MessageFactory.createUdpMessage(msgType, sendMsg).setRecipient(session.getSender());
     }
 }

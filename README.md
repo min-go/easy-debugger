@@ -8,11 +8,11 @@
 - TCP服务端
 - UDP客户端
 - UDP服务端
+- WebSocket服务端
+- WebSocket客户端
 
 ## TODO
 
-- WebSocket客户端
-- WebSocket服务端
 - HTTP服务端
 - FTP客户端
 
