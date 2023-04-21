@@ -60,7 +60,7 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
     @Override
     public void destroy() {
         super.destroy();
-        disableRepeatSendSchedule();
+        offline();
     }
 
     public void enableRepeatSendSchedule() {
