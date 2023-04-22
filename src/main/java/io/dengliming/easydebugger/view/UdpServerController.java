@@ -9,7 +9,6 @@ import io.dengliming.easydebugger.netty.MessageFactory;
 import io.dengliming.easydebugger.netty.UdpMessage;
 import io.dengliming.easydebugger.netty.event.ChannelEvent;
 import io.dengliming.easydebugger.netty.event.ClientReadMessageEvent;
-import io.dengliming.easydebugger.netty.server.AbstractDebuggerServer;
 import io.dengliming.easydebugger.utils.ConfigStorage;
 import io.dengliming.easydebugger.utils.SocketDebuggerCache;
 import io.dengliming.easydebugger.utils.T;
@@ -17,7 +16,6 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleObjectProperty;
 import lombok.extern.slf4j.Slf4j;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
 @Slf4j
@@ -57,8 +55,9 @@ public class UdpServerController extends AbstractServerController {
                 }
                 clientList.refresh();
 
-                ((AbstractDebuggerServer) SocketDebuggerCache.INSTANCE.getOrCreateServer(serverConfig, this))
-                        .getServerDebuggerView().addLeftMsg(clientId, new String(((UdpMessage) msgEvent.getMsg()).getMessage(), StandardCharsets.UTF_8));
+                SocketDebuggerCache.INSTANCE.getOrCreateServer(serverConfig, this)
+                        .getServerDebuggerView()
+                        .addLeftMsg(clientId, T.bytesToString(((UdpMessage) msgEvent.getMsg()).getMessage()));
 
                 // 自动回复消息
                 if (serverConfig.isAutoReply() && T.hasLength(serverConfig.getSendMsg())) {

@@ -4,6 +4,7 @@ import io.dengliming.easydebugger.constant.MsgType;
 import io.dengliming.easydebugger.model.ChatMsgBox;
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.*;
+import io.dengliming.easydebugger.netty.codec.MsgDecoder;
 import io.dengliming.easydebugger.netty.codec.MsgEncoder;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
 import io.dengliming.easydebugger.utils.SocketDebuggerCache;
@@ -32,7 +33,7 @@ public abstract class SocketDebuggerClient extends AbstractSocketClient {
 
     @Override
     protected ChannelInboundHandler createProtocolDecoder() {
-        return new StringDecoder();
+        return new MsgDecoder();
     }
 
     @Override

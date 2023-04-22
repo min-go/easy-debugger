@@ -264,6 +264,11 @@ public abstract class AbstractServerController implements IGenericEventListener<
                 return;
             }
 
+            if (hexMsgOption.isSelected() && !T.isHexString(message)) {
+                Alerts.showWarning("请输入正确的16进制！", null);
+                return;
+            }
+
             ClientItem clientItem = clientList.getSelectionModel().getSelectedItem();
             // 群发
             if (groupSendCheckBox.isSelected()) {
@@ -315,7 +320,7 @@ public abstract class AbstractServerController implements IGenericEventListener<
                 if (serverConfig == null) {
                     return;
                 }
-                ((AbstractDebuggerServer) SocketDebuggerCache.INSTANCE.getOrCreateServer(serverConfig, this))
+                SocketDebuggerCache.INSTANCE.getOrCreateServer(serverConfig, this)
                         .getServerDebuggerView().addLeftMsg(clientId, msgEvent.getMsg().toString());
 
                 // 自动回复消息

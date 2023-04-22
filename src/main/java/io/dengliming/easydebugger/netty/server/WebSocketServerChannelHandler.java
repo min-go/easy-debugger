@@ -14,7 +14,6 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
 import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
 
 public class WebSocketServerChannelHandler extends SimpleChannelInboundHandler<WebSocketFrame> {
 
@@ -33,7 +32,7 @@ public class WebSocketServerChannelHandler extends SimpleChannelInboundHandler<W
             ByteBuf content = frame.content();
             byte[] result = new byte[content.readableBytes()];
             content.readBytes(result);
-            msg = new String(result, StandardCharsets.UTF_8);
+            msg = T.bytesToString(result);
         } else if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             msg = textFrame.text();
@@ -42,8 +41,6 @@ public class WebSocketServerChannelHandler extends SimpleChannelInboundHandler<W
             return;
         }
         ClientReadMessageEvent event = new ClientReadMessageEvent(T.generateClientId((InetSocketAddress) ctx.channel().remoteAddress()), msg);
-
-        System.out.println("=============<<<>>>>>>" + event.getSource());
         event.setServerId(config.getConnectKey());
         eventListener.onEvent(event);
         ctx.fireChannelRead(msg);

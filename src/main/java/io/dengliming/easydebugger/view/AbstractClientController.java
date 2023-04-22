@@ -10,6 +10,7 @@ import io.dengliming.easydebugger.netty.event.*;
 import io.dengliming.easydebugger.utils.Alerts;
 import io.dengliming.easydebugger.utils.ConfigStorage;
 import io.dengliming.easydebugger.utils.SocketDebuggerCache;
+import io.dengliming.easydebugger.utils.T;
 import javafx.application.Platform;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -102,6 +103,11 @@ public abstract class AbstractClientController implements IGenericEventListener<
             }
 
             if (!verifyConnectStatus()) {
+                return;
+            }
+
+            if (hexMsgOption.isSelected() && !T.isHexString(message)) {
+                Alerts.showWarning("请输入正确的16进制！", null);
                 return;
             }
 

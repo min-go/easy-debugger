@@ -6,6 +6,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.NetworkInterface;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Enumeration;
@@ -174,5 +175,15 @@ public final class T {
             }
         }
         return false;
+    }
+
+    public static String bytesToString(byte[] bytes) {
+        String str = new String(bytes, StandardCharsets.UTF_8);
+        // 判断是否乱码，如果乱码改用16进制
+        // TODO 这里暂时没有更好方法同时兼容16进制和字符串
+        if (T.isMessyCode(str)) {
+            return bytesToHex(bytes);
+        }
+        return str;
     }
 }
