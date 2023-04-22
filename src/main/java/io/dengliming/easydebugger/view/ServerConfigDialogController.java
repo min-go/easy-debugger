@@ -50,11 +50,16 @@ public class ServerConfigDialogController implements Initializable {
             config.setHost(hostField.getText());
             config.setPort(Integer.parseInt(portField.getText()));
             config.setAutoReply(autoReplyBox.isSelected());
-            String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
-            if (msgType != null) {
-                config.setSendMsgType(MsgType.getByName(msgType));
+            if (!autoReplyBox.isSelected()) {
+                config.setSendMsgType(null);
+                config.setSendMsg("");
+            } else {
+                String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
+                if (msgType != null) {
+                    config.setSendMsgType(MsgType.getByName(msgType));
+                }
+                config.setSendMsg(replyMsg.getText());
             }
-            config.setSendMsg(replyMsg.getText());
         }
 
         this.isOkClicked = true;
@@ -100,6 +105,12 @@ public class ServerConfigDialogController implements Initializable {
         else if (autoReplyBox.isSelected()) {
             if (replyMsg.getText() == null || replyMsg.getText().length() == 0) {
                 errorMessage = "请输入回复的内容！";
+            }
+            else {
+                String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
+                if (msgType != null && MsgType.getByName(msgType) == MsgType.HEX && !T.isHexString(replyMsg.getText())) {
+                    errorMessage = "请输入正确的16进制内容！";
+                }
             }
         }
 

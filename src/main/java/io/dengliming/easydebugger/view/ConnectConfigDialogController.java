@@ -52,14 +52,20 @@ public class ConnectConfigDialogController implements Initializable {
             config.setHost(hostField.getText());
             config.setPort(Integer.parseInt(portField.getText()));
             config.setRepeatSend(repeatSendBox.isSelected());
-            String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
-            if (msgType != null) {
-                config.setSendMsgType(MsgType.getByName(msgType));
-            }
-            config.setSendMsg(repeatSendMsg.getText());
-            String sendInterval = sendIntervalField.getText();
-            if (sendInterval != null && sendInterval.length() > 0) {
-                config.setSendInterval(Integer.parseInt(sendInterval));
+            if (!repeatSendBox.isSelected()) {
+                config.setSendMsgType(null);
+                config.setSendMsg("");
+                config.setSendInterval(0);
+            } else {
+                String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
+                if (msgType != null) {
+                    config.setSendMsgType(MsgType.getByName(msgType));
+                }
+                config.setSendMsg(repeatSendMsg.getText());
+                String sendInterval = sendIntervalField.getText();
+                if (sendInterval != null && sendInterval.length() > 0) {
+                    config.setSendInterval(Integer.parseInt(sendInterval));
+                }
             }
         }
 
@@ -107,8 +113,15 @@ public class ConnectConfigDialogController implements Initializable {
         else if (repeatSendBox.isSelected()) {
             if (sendIntervalField.getText() == null || sendIntervalField.getText().length() == 0) {
                 errorMessage = "请输入重复发送的间隔！";
-            } else if (repeatSendMsg.getText() == null || repeatSendMsg.getText().length() == 0) {
+            }
+            else if (repeatSendMsg.getText() == null || repeatSendMsg.getText().length() == 0) {
                 errorMessage = "请输入重复发送的内容！";
+            }
+            else {
+                String msgType = msgTypeComboBox.getSelectionModel().getSelectedItem();
+                if (msgType != null && MsgType.getByName(msgType) == MsgType.HEX && !T.isHexString(repeatSendMsg.getText())) {
+                    errorMessage = "请输入正确的16进制内容！";
+                }
             }
         }
 

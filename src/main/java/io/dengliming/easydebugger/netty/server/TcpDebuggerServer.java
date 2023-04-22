@@ -2,6 +2,7 @@ package io.dengliming.easydebugger.netty.server;
 
 import io.dengliming.easydebugger.model.ConnectConfig;
 import io.dengliming.easydebugger.netty.ConnectProperties;
+import io.dengliming.easydebugger.netty.codec.MsgDecoder;
 import io.dengliming.easydebugger.netty.codec.MsgEncoder;
 import io.dengliming.easydebugger.netty.event.IGenericEventListener;
 import io.netty.bootstrap.AbstractBootstrap;
@@ -66,7 +67,7 @@ public class TcpDebuggerServer extends AbstractDebuggerServer {
 
     @Override
     protected ChannelInboundHandlerAdapter createProtocolDecoder() {
-        return new StringDecoder();
+        return new MsgDecoder();
     }
 
     @Override

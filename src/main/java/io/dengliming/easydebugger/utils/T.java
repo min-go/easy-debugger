@@ -20,6 +20,8 @@ public final class T {
 
     private static final Pattern PORT_PATTERN = Pattern.compile("^\\d{1,5}$");
 
+    private static final Pattern HEX_STRING_PATTERN = Pattern.compile("^([0-9A-Fa-f]{2})+$");
+
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     public static String format(LocalDateTime dateTime) {
@@ -82,6 +84,25 @@ public final class T {
         return (str != null && !str.isEmpty());
     }
 
+    private static final char[] HEX_CHAR = {'0', '1', '2', '3', '4', '5',
+            '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
+    public static String bytesToHex(byte[] bytes) {
+        // 一个byte为8位，可用两个十六进制位标识
+        char[] buf = new char[bytes.length * 2];
+        int a, index = 0;
+        for (byte b : bytes) { // 使用除与取余进行转换
+            if (b < 0) {
+                a = 256 + b;
+            } else {
+                a = b;
+            }
+            buf[index++] = HEX_CHAR[a / 16];
+            buf[index++] = HEX_CHAR[a % 16];
+        }
+        return new String(buf);
+    }
+
     public static byte[] toHexBytes(String str) {
         if (str == null || str.trim().equals("")) {
             return new byte[0];
@@ -98,5 +119,60 @@ public final class T {
         String clientIp = socketAddress.getAddress().getHostAddress();
         int clientPort = socketAddress.getPort();
         return String.format("%s:%d", clientIp, clientPort);
+    }
+
+    public static boolean isHexString(String str) {
+        return HEX_STRING_PATTERN.matcher(str).matches();
+    }
+
+    /**
+     * 判断是否中文字符
+     *
+     * @param c c
+     * @return boolean
+     */
+    public static boolean isChinese(final char c) {
+        final Character.UnicodeBlock ub = Character.UnicodeBlock.of(c);
+        if (ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_COMPATIBILITY_IDEOGRAPHS
+                || ub == Character.UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS_EXTENSION_A
+                || ub == Character.UnicodeBlock.GENERAL_PUNCTUATION
+                || ub == Character.UnicodeBlock.CJK_SYMBOLS_AND_PUNCTUATION
+                || ub == Character.UnicodeBlock.HALFWIDTH_AND_FULLWIDTH_FORMS) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 判断是否乱码.
+     *
+     * @param strName strName
+     * @return boolean
+     */
+    public static boolean isMessyCode(final String strName) {
+        final Pattern p = Pattern.compile("\\s*|\t*|\r*|\n*");
+        final Matcher m = p.matcher(strName);
+        final String after = m.replaceAll("");
+        final String temp = after.replaceAll("\\p{P}", "")
+                .replaceAll("`", "")
+                .replaceAll("~", "")
+                .replaceAll("\\$", "")
+                .replaceAll("\\^", "")
+                .replaceAll("\\+", "")
+                .replaceAll("=", "")
+                .replaceAll("<", "")
+                .replaceAll(">", "")
+                .replaceAll("\\|", "");
+        final char[] ch = temp.trim().toCharArray();
+        for (int i = 0; i < ch.length; i++) {
+            final char c = ch[i];
+            if (!Character.isLetterOrDigit(c)) {
+                if (!isChinese(c)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }
