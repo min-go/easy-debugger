@@ -161,7 +161,7 @@ const peers = computed(() => rt.value?.peers ?? []);
 </template>
 
 <style scoped>
-.m-shell { height: 100%; width: 100%; max-width: 100vw; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
+.m-shell { height: 100dvh; width: 100%; max-width: 100vw; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; }
 .page { flex: 1; min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
 .page.chat { min-width: 0; }
 .m-head { display: flex; align-items: center; gap: 8px; height: 52px; padding: 0 12px; padding-top: env(safe-area-inset-top); background: var(--panel); border-bottom: 1px solid var(--border); flex-shrink: 0; }

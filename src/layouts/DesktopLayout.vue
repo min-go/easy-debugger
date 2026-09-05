@@ -58,7 +58,7 @@ const totals = computed(() => {
 </template>
 
 <style scoped>
-.shell { height: 100%; display: flex; flex-direction: column; }
+.shell { height: 100vh; display: flex; flex-direction: column; }
 .topbar { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 12px 0 84px; border-bottom: 1px solid var(--border); background: var(--panel); flex-shrink: 0; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; }
 .brand .icon { stroke: var(--accent); }
