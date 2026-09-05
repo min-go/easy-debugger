@@ -51,7 +51,7 @@ const totals = computed(() => {
       <span class="mono">↓ {{ fmtBytes(totals.i) }}</span>
       <span>{{ t('nav.activeSessions', { n: activeCount }) }}</span>
       <span class="spacer"></span>
-      <span>v2.0.0</span>
+      <span>v1.0.0</span>
     </footer>
     <SettingsDialog />
   </div>
