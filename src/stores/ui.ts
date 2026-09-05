@@ -20,9 +20,11 @@ export const useUi = defineStore('ui', () => {
     try {
       const p = await osPlatform();
       platform.value = p === 'android' || p === 'ios' ? 'mobile' : 'desktop';
+      document.documentElement.setAttribute('data-os', p);
     } catch {
       // Not running under Tauri (e.g. plain browser): fall back to a touch + narrow-screen heuristic.
       platform.value = navigator.maxTouchPoints > 0 && Math.min(screen.width, screen.height) < 640 ? 'mobile' : 'desktop';
+      document.documentElement.setAttribute('data-os', 'web');
     }
   }
   const os = useOsTheme();

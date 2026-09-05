@@ -59,18 +59,24 @@ async function onMenu(key: string) {
     await configs.save(copy);
     message.success(t('common.copied'));
   }
-  if (key === 'del') {
-    dialog.warning({
-      title: t('session.deleteTitle'),
-      content: t('session.deleteConfirm', { name: c.name }),
-      positiveText: t('common.delete'),
-      negativeText: t('common.cancel'),
-      onPositiveClick: async () => {
+  if (key === 'del') confirmDelete(c);
+}
+
+function confirmDelete(c: SessionConfig) {
+  dialog.warning({
+    title: t('session.deleteTitle'),
+    content: t('session.deleteConfirm', { name: c.name }),
+    positiveText: t('common.delete'),
+    negativeText: t('common.cancel'),
+    onPositiveClick: async () => {
+      try {
         await configs.remove([c.uid]);
         sessions.drop(c.uid);
-      },
-    });
-  }
+      } catch (e) {
+        message.error(String(e));
+      }
+    },
+  });
 }
 
 async function toggle(c: SessionConfig) {
@@ -116,6 +122,7 @@ async function toggle(c: SessionConfig) {
               <span class="addr mono">{{ addr(c) }}</span>
             </div>
             <span v-if="sessions.runtime[c.uid]?.unread" class="badge">{{ sessions.runtime[c.uid].unread }}</span>
+            <button class="del icon-btn" :title="t('common.delete')" @click.stop="confirmDelete(c)"><Icon name="trash" size="sm" /></button>
           </div>
           <div v-if="!g.items.length" class="none">{{ t('sidebar.noConfig') }}</div>
         </template>
@@ -144,6 +151,9 @@ async function toggle(c: SessionConfig) {
 .item .text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .item .name { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .item .addr { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.item .del { width: 24px; height: 24px; opacity: 0; flex-shrink: 0; }
+.item:hover .del { opacity: 1; }
+.item .del:hover { color: var(--red); }
 .badge { min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
 .none { padding: 6px 10px 2px; font-size: 12px; color: var(--faint); }
 .foot { padding: 10px 12px; border-top: 1px solid var(--border); }
