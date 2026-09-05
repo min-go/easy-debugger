@@ -51,13 +51,15 @@ jobs:
           tagName: ${{ github.ref_name }}
           releaseName: 'Easy Debugger ${{ github.ref_name }}'
           releaseBody: |
-            各平台安装包见下方 Assets。
+            Download the installer for your platform from the assets below.
 
-            - macOS: `.dmg`（Apple Silicon 与 Intel 各一个）
+            - macOS: `.dmg` (Apple Silicon and Intel)
             - Windows: `.msi` / `.exe`
-            - Linux: `.deb` / `.AppImage`
+            - Linux: `.deb` / `.AppImage` / `.rpm`
+            - Android: `.apk` (debug-signed, installable)
 
-            macOS 未签名，首次打开若提示“已损坏”，在终端执行：
+            The macOS and Windows builds are unsigned. On macOS, if you see
+            "app is damaged", run:
             `xattr -dr com.apple.quarantine "/Applications/Easy Debugger.app"`
           releaseDraft: true
           prerelease: false
