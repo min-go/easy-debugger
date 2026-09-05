@@ -106,17 +106,31 @@ jobs:
       - name: Init Android project
         run: pnpm tauri android init
 
-      # Debug variant is signed with the Android debug key, so the APK is installable directly
-      # (users must allow "install from unknown sources"). For Play Store upload, configure your
-      # own upload keystore and switch to a signed release build.
+      # Sign the release build. A debug build ships unstripped Rust symbols across four ABIs and
+      # balloons to hundreds of MB; a signed release build is a few tens of MB. The keystore is
+      # generated fresh here (ephemeral) — for reproducible in-place upgrades, store a fixed
+      # keystore as a secret and use that instead.
+      - name: Configure release signing
+        run: |
+          KS="$RUNNER_TEMP/upload.jks"
+          PASS=easydebugger
+          keytool -genkeypair -v -keystore "$KS" -alias upload -keyalg RSA -keysize 2048 -validity 10000 -storepass "$PASS" -keypass "$PASS" -dname "CN=Easy Debugger, O=easy-debugger, C=US"
+          {
+            echo "password=$PASS"
+            echo "keyAlias=upload"
+            echo "storeFile=$KS"
+          } > src-tauri/gen/android/keystore.properties
+          python3 .github/scripts/patch-android-signing.py
+
       - name: Build APK
-        run: pnpm tauri android build --debug --apk
+        run: pnpm tauri android build --apk
 
       - name: Upload APK to release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          APK=$(find src-tauri/gen/android -name '*.apk' | head -1)
+          APK=$(find src-tauri/gen/android -name '*.apk' -path '*release*' | head -1)
           OUT="easy-debugger_${GITHUB_REF_NAME}_android.apk"
           cp "$APK" "$OUT"
+          ls -lh "$OUT"
           gh release upload "$GITHUB_REF_NAME" "$OUT" --clobber
