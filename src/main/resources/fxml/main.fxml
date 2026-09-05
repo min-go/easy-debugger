@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
-<?import javafx.scene.control.TabPane?>
-<TabPane fx:id="tabPane" xmlns:fx="http://javafx.com/fxml/1" fx:controller="io.dengliming.easydebugger.view.MainController">
-    <tabs>
-    </tabs>
-</TabPane>
