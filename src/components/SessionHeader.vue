@@ -65,7 +65,7 @@ const addr = computed(() => {
       {{ rt.online || rt.reconnecting ? (server ? t('status.closeListen') : t('status.disconnect')) : server ? t('status.startListen') : t('status.connect') }}
     </button>
     <button class="icon-btn" :title="t('common.edit')" @click="emit('edit')"><Icon name="edit" /></button>
-    <button class="icon-btn" :title="t('common.clear')" @click="sessions.clear(config.uid)"><Icon name="trash" /></button>
+    <button class="icon-btn" :title="t('messages.clearTitle')" @click="sessions.clear(config.uid)"><Icon name="eraser" /></button>
     <button class="icon-btn" :title="t('nav.settings')" @click="ui.panelOpen = !ui.panelOpen"><Icon name="panel" /></button>
   </header>
 </template>

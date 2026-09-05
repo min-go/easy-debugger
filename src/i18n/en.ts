@@ -27,7 +27,7 @@ export default {
     empty: 'Content is empty', notStarted: 'Session not started', choosePeer: 'Pick a peer on the right, or enable broadcast', saveSnippet: 'Save current content as a snippet',
     snippetName: 'Snippet name', savedToLib: 'Saved to snippets', snippetLibEmpty: 'No snippets',
   },
-  messages: { filter: 'Filter text or hex', count: '{n}', empty: 'No messages', newer: '{n} new', copyContent: 'Copy content', copyHex: 'Copy hex', mode: { local: 'Local', auto: 'Auto', text: 'Text', hex: 'Hex', dump: 'Dump' }, showMode: 'Show: {mode}' },
+  messages: { filter: 'Filter text or hex', count: '{n}', empty: 'No messages', clearTitle: 'Clear messages', newer: '{n} new', copyContent: 'Copy content', copyHex: 'Copy hex', mode: { local: 'Local', auto: 'Auto', text: 'Text', hex: 'Hex', dump: 'Dump' }, showMode: 'Show: {mode}' },
   info: {
     peersOnline: 'Peers · {n} online', noPeers: 'No peers connected', joined: 'joined', left: 'left', filtered: 'Filtered {peer}, tap again to clear', kick: 'Disconnect this peer',
     stats: 'Statistics', received: 'Received', sent: 'Sent', totalPeers: 'Total peers', errors: 'Errors', count: '{n}',

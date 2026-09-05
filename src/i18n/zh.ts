@@ -27,7 +27,7 @@ export default {
     empty: '内容为空', notStarted: '会话未启动', choosePeer: '请在右侧选择一个对端，或勾选群发', saveSnippet: '把当前内容存为片段',
     snippetName: '片段名称', savedToLib: '已保存到片段库', snippetLibEmpty: '片段库为空',
   },
-  messages: { filter: '过滤文本或 Hex', count: '{n} 条', empty: '暂无消息', newer: '{n} 条新消息', copyContent: '复制内容', copyHex: '复制 Hex', mode: { local: '本地', auto: '自动', text: '文本', hex: 'Hex', dump: 'Dump' }, showMode: '显示: {mode}' },
+  messages: { filter: '过滤文本或 Hex', count: '{n} 条', empty: '暂无消息', clearTitle: '清空消息', newer: '{n} 条新消息', copyContent: '复制内容', copyHex: '复制 Hex', mode: { local: '本地', auto: '自动', text: '文本', hex: 'Hex', dump: 'Dump' }, showMode: '显示: {mode}' },
   info: {
     peersOnline: '对端 · {n} 在线', noPeers: '暂无对端接入', joined: '接入', left: '断开', filtered: '已筛选 {peer}，再次点击取消', kick: '断开该对端',
     stats: '统计', received: '已接收', sent: '已发送', totalPeers: '累计对端', errors: '错误', count: '{n} 条',
