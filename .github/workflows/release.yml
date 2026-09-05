@@ -58,9 +58,19 @@ jobs:
             - Linux: `.deb` / `.AppImage` / `.rpm`
             - Android: `.apk` (debug-signed, installable)
 
-            The macOS and Windows builds are unsigned. On macOS, if you see
-            "app is damaged", run:
-            `xattr -dr com.apple.quarantine "/Applications/Easy Debugger.app"`
+            The macOS and Windows builds are unsigned.
+
+            **macOS**: if you see "app is damaged and can't be opened", run these
+            two commands after moving the app to /Applications (the second one
+            re-signs it locally with an ad-hoc signature, which recent macOS
+            requires for unsigned apps):
+
+            ```
+            xattr -cr "/Applications/Easy Debugger.app"
+            codesign --force --deep --sign - "/Applications/Easy Debugger.app"
+            ```
+
+            **Windows**: click "More info" then "Run anyway" on the SmartScreen prompt.
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
