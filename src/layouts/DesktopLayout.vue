@@ -60,8 +60,6 @@ const totals = computed(() => {
 <style scoped>
 .shell { height: 100vh; display: flex; flex-direction: column; }
 .topbar { height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 12px; border-bottom: 1px solid var(--border); background: var(--panel); flex-shrink: 0; }
-/* macOS overlay title bar: reserve room for the traffic-light buttons */
-:global(html[data-os="macos"]) .topbar { padding-left: 84px; }
 .brand { display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 13.5px; }
 .brand .icon { stroke: var(--accent); }
 .nav { display: flex; align-items: center; gap: 2px; margin-left: 20px; }
