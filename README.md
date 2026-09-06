@@ -1,6 +1,8 @@
 <div align="center">
 
-# ⚡ Easy Debugger
+<img src="src-tauri/icons/128x128@2x.png" width="96" height="96" alt="Easy Debugger" />
+
+# Easy Debugger
 
 **English** · [中文](README.zh.md)
 
@@ -8,8 +10,8 @@ A lightweight desktop **socket debugger** for **TCP, UDP and WebSocket** — cli
 with built-in **DNS lookup** and **network diagnostics**.
 Built with Tauri 2, Rust and Vue 3. Clean UI, tiny install size.
 
+[![CI](https://img.shields.io/github/actions/workflow/status/min-go/easy-debugger/ci.yml?branch=main&style=flat-square&label=CI)](https://github.com/min-go/easy-debugger/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/min-go/easy-debugger?style=flat-square&color=3E63DD)](https://github.com/min-go/easy-debugger/releases/latest)
-[![Downloads](https://img.shields.io/github/downloads/min-go/easy-debugger/total?style=flat-square)](https://github.com/min-go/easy-debugger/releases)
 [![License](https://img.shields.io/github/license/min-go/easy-debugger?style=flat-square)](LICENSE)
 ![Platform](https://img.shields.io/badge/platform-macOS%20%C2%B7%20Windows%20%C2%B7%20Linux%20%C2%B7%20Android-555?style=flat-square)
 
@@ -23,7 +25,7 @@ Built with Tauri 2, Rust and Vue 3. Clean UI, tiny install size.
 
 </div>
 
-## ✨ Features
+## Features
 
 | | |
 |---|---|
@@ -37,7 +39,7 @@ Built with Tauri 2, Rust and Vue 3. Clean UI, tiny install size.
 | **Diagnostics** | Local interfaces, port connectivity check |
 | **Experience** | Light / dark theme follows the system, bilingual UI (System / 中文 / English), config persisted as JSON |
 
-## 📸 Screenshots
+## Screenshots
 
 ### Sessions (TCP server, light & dark)
 
@@ -63,7 +65,7 @@ Single-column layout with a bottom tab bar; the info panel becomes a bottom shee
   <img src="docs/images/en/mobile-panel.png" width="240" alt="Mobile info panel" />
 </p>
 
-## 📦 Install
+## Install
 
 Grab the installer for your platform from the [latest release](https://github.com/min-go/easy-debugger/releases/latest):
 
@@ -84,7 +86,7 @@ codesign --force --deep --sign - "/Applications/Easy Debugger.app"
 
 On Windows, click **More info → Run anyway** on the SmartScreen prompt.
 
-## 🛠 Development
+## Development
 
 Requires Node 22+, pnpm, Rust 1.90+; on macOS the Xcode Command Line Tools.
 
@@ -94,7 +96,7 @@ pnpm tauri dev      # run in dev
 pnpm tauri build    # bundle → src-tauri/target/release/bundle
 ```
 
-## 📱 Mobile
+## Mobile
 
 The layout switches automatically by platform: three columns on desktop, a single column with a bottom tab bar and a bottom-sheet info panel on mobile. The core Rust logic is shared across both.
 
@@ -103,19 +105,19 @@ pnpm tauri android init && pnpm tauri android build   # needs Android Studio + N
 pnpm tauri ios init && pnpm tauri ios build           # needs macOS + Xcode
 ```
 
-## 🧪 Testing
+## Testing
 
 ```bash
 cd src-tauri && cargo test   # unit tests + end-to-end tests for all five transports
 pnpm vue-tsc --noEmit        # frontend type check
 ```
 
-## 🗂 Project layout
+## Project layout
 
 - `src/` — frontend: `api/` command & event wrappers, `stores/` state, `components/` & `views/` UI, `i18n/` locales.
 - `src-tauri/src/` — backend: `session/` transports, `codec.rs` encode/decode, `framing.rs` framing, `dns.rs` & `net.rs` tools, `commands.rs` command layer.
 - `docs/SPEC.md` — full product spec (Chinese).
 
-## 📄 License
+## License
 
 [Apache License 2.0](LICENSE)
