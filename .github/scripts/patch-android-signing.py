@@ -7,8 +7,12 @@ produces a signed, installable release APK.
 f = "src-tauri/gen/android/app/build.gradle.kts"
 s = open(f).read()
 
-if "import java.io.FileInputStream" not in s:
-    s = "import java.io.FileInputStream\nimport java.util.Properties\n" + s
+# Add only the imports that are missing; the Tauri template already imports
+# java.util.Properties, so adding it again causes a "conflicting import" error.
+for _imp in ("java.io.FileInputStream", "java.util.Properties"):
+    _line = "import " + _imp
+    if _line not in s:
+        s = _line + "\n" + s
 
 sign = """
     signingConfigs {
